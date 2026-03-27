@@ -75,6 +75,7 @@ public class PD7G1 implements KeyListener{
     boolean q5Answered = false;
     boolean q8Answered = false;
     boolean hasKey = false;
+    boolean introShown = false;
     int tileSize = 90;
     int frameWidth = tileSize * mapWidth;
     int frameHeight = tileSize * mapHeight;
@@ -318,79 +319,102 @@ public class PD7G1 implements KeyListener{
     }
     
     public boolean askQuestion4() {
-        try {
-            String answer = JOptionPane.showInputDialog(
-                frame,
-                "Question 1:\nWhat is (5 + 7)*8?",
-                "Question",
-                JOptionPane.QUESTION_MESSAGE
-            );
-            if (answer == null)
-                throw new Exception("No input");
-            int userAnswer = Integer.parseInt(answer);
-            return userAnswer == 96;
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(
-                frame,
-                "Invalid input. Please enter a NUMBER.",
-                "Input Error",
-                JOptionPane.ERROR_MESSAGE
-            );
-            return false;
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(
-                frame,
-                "Invalid input. Please try again.",
-                "Input Error",
-                JOptionPane.ERROR_MESSAGE
-            );
-            return false;
+        while (true) {
+            String answer = null;
+            try {
+                answer = JOptionPane.showInputDialog(
+                    frame,
+                    "Question 1:\nWhat is (5 + 7)*8?",
+                    "Question",
+                    JOptionPane.QUESTION_MESSAGE
+                );
+                if (answer == null) {
+                    throw new Exception("No input");
+                }
+                int userAnswer = Integer.parseInt(answer);
+                return userAnswer == 96;
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "Invalid input. Please enter a NUMBER.",
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "You must enter an answer!",
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            } finally {
+                System.out.println("Question 1 attempt processed.");
+            }
         }
     }
     
     public boolean askQuestion5() {
-        try {
-            String answer = JOptionPane.showInputDialog(
-                frame,
-                "Question 2:\nWhat is the capital of China?",
-                "Question",
-                JOptionPane.QUESTION_MESSAGE
-            );
-            if(answer == null || answer.trim().isEmpty()){
-                throw new Exception("Empty input");
+        while (true) {
+            String answer = null;
+            try {
+                answer = JOptionPane.showInputDialog(
+                    frame,
+                    "Question 2:\nWhat is the capital of China?",
+                    "Question",
+                    JOptionPane.QUESTION_MESSAGE
+                );
+                if (answer == null || answer.trim().isEmpty()) {
+                    throw new Exception("Empty input");
+                }
+                return answer.equalsIgnoreCase("Beijing");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "Please enter a valid answer!",
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            } finally {
+                System.out.println("Question 2 attempt processed.");
             }
-            return answer.equalsIgnoreCase("Beijing");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(
-                frame,
-                "Invalid input. Please type a valid answer.",
-                "Input Error",
-                JOptionPane.ERROR_MESSAGE
-            );
-            return false;
         }
     }
     
     public boolean askQuestion8() {
-        String answer = JOptionPane.showInputDialog(
-            frame,
-            "Question 3:\nWhat planet was taken off the original 9 planets?",
-            "Question",
-            JOptionPane.QUESTION_MESSAGE
-        );
-        if (answer == null) return false;
-        return answer.equalsIgnoreCase("Pluto");
+        while (true) {
+            String answer = null;
+            try {
+                answer = JOptionPane.showInputDialog(
+                    frame,
+                    "Question 3:\nWhat planet was taken off the original 9 planets?",
+                    "Question",
+                    JOptionPane.QUESTION_MESSAGE
+                );
+                if (answer == null || answer.trim().isEmpty()) {
+                    throw new Exception("Empty input");
+                }
+                return answer.equalsIgnoreCase("Pluto");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "Please enter a valid answer!",
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            } finally {
+                System.out.println("Question 3 attempt processed.");
+            }
+        }
     }
     
     public void processAnswer(boolean correct){
         attempts++;
-
         if(correct){
             correctAnswers++;
             player.addPoints();
             JOptionPane.showMessageDialog(frame, "Correct!");
         } else {
-            JOptionPane.showMessageDialog(frame, "Wrong!");
+            JOptionPane.showMessageDialog(frame, "Wrong! Try to remember this for next time.");
         }
     }
     
@@ -399,92 +423,22 @@ public class PD7G1 implements KeyListener{
         characterPosition = newPosition;
         player.setPosition(newPosition);
         character[newPosition].setIcon(playerIcon);
-
-        int tile = characterPlace[newPosition];
-
-        switch(tile) {
-
-            case 3:
-                JOptionPane.showMessageDialog(frame,
-                    "OBJECTIVE:\n\n"
-                  + "1. Answer all 3 questions.\n"
-                  + "2. Get a perfect score.\n"
-                  + "3. Get the key.\n"
-                  + "4. Reach the gate.",
-                    "Game Objectives",
-                    JOptionPane.INFORMATION_MESSAGE);
-                break;
-                
-                
-            case 4:
-                if(!q4Answered){
-                    boolean correct = askQuestion4();
-                    processAnswer(correct);
-                    q4Answered = true;
-                }
-                break;
-
-            case 5:
-                if(!q5Answered){
-                    boolean correct = askQuestion5();
-                    processAnswer(correct);
-                    q5Answered = true;
-                }
-                break;
-
-            case 8:
-                if(!q8Answered){
-                    boolean correct = askQuestion8();
-                    processAnswer(correct);
-                    q8Answered = true;
-                }
-                break;
-
-            case 6:
-                if(attempts < 3){
-                    JOptionPane.showMessageDialog(frame,
-                        "Answer all 3 questions first!");
-                    return;
-                }
-
-                int percentage = (correctAnswers * 100) / 3;
-
-                if(percentage >= 60){
-                    hasKey = true;
-                    JOptionPane.showMessageDialog(frame,
-                        "You passed with " + percentage + "%!\nYou obtained the key!");
-                } else {
-                    showFailScreen(percentage);
-                }
-                break;
-
-            case 7:
-                if(hasKey){
-                    JOptionPane.showMessageDialog(frame,
-                        "LEVEL COMPLETE!\nFinal Score: "
-                        + ((correctAnswers*100)/3) + "%");
-                    frame.dispose();
-                } else {
-                    JOptionPane.showMessageDialog(frame,
-                        "The gate is locked.\nGet the key first!");
-                }
-                break;
-        }
     }
     
-    private void handleInteraction(int tile) {
+    public void handleInteraction(int tile) {
         switch(tile) {
             case 3:
-                JOptionPane.showMessageDialog(frame,
-                    "OBJECTIVE:\n\n"
-                  + "1. Answer all 3 questions.\n"
-                  + "2. Get a perfect score.\n"
-                  + "3. Get the key.\n"
-                  + "4. Reach the gate.",
-                    "Game Objectives",
-                    JOptionPane.INFORMATION_MESSAGE);
+                if(!introShown){
+                    JOptionPane.showMessageDialog(frame,
+                        "OBJECTIVE:\n\n"
+                      + "1. Answer all 3 questions.\n"
+                      + "2. Get a perfect score.\n"
+                      + "3. Get the key.\n"
+                      + "4. Reach the gate.");
+                    introShown = true;
+                }
                 break;
-                
+
             case 4:
                 if(!q4Answered){
                     boolean correct = askQuestion4();
@@ -492,7 +446,7 @@ public class PD7G1 implements KeyListener{
                     q4Answered = true;
                 }
                 break;
-                
+
             case 5:
                 if(!q5Answered){
                     boolean correct = askQuestion5();
@@ -500,7 +454,7 @@ public class PD7G1 implements KeyListener{
                     q5Answered = true;
                 }
                 break;
-                
+
             case 8:
                 if(!q8Answered){
                     boolean correct = askQuestion8();
@@ -508,16 +462,16 @@ public class PD7G1 implements KeyListener{
                     q8Answered = true;
                 }
                 break;
-                
+
             case 6:
                 if(attempts < 3){
                     JOptionPane.showMessageDialog(frame,
                         "Answer all 3 questions first!");
                     return;
                 }
-                
+
                 int percentage = (correctAnswers * 100) / 3;
-                
+
                 if(percentage >= 60){
                     hasKey = true;
                     JOptionPane.showMessageDialog(frame,
@@ -526,7 +480,7 @@ public class PD7G1 implements KeyListener{
                     showFailScreen(percentage);
                 }
                 break;
-                
+
             case 7:
                 if(hasKey){
                     JOptionPane.showMessageDialog(frame,
@@ -540,7 +494,6 @@ public class PD7G1 implements KeyListener{
                 break;
         }
     }
-
     
     private void restartGame(){
         correctAnswers = 0;
@@ -593,12 +546,18 @@ public class PD7G1 implements KeyListener{
             int tile = characterPlace[newPosition];
             if (tile == 1)
                 return;
-            if (tile == 3 || tile == 4 || tile == 5 || tile == 6 || tile == 7 || tile == 8) {
-                handleInteraction(tile);
+            if (tile == 6 && attempts < 3) {
+                JOptionPane.showMessageDialog(frame,
+                    "Answer all 3 questions first!");
                 return;
             }
-            if (newPosition != characterPosition)
-                moveCharacter(newPosition);
+            if (newPosition != characterPosition) {
+                if (tile >= 3 && tile <= 8) {
+                    handleInteraction(tile);
+                } else {
+                    moveCharacter(newPosition);
+                }
+            }
         } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(
                 frame,
