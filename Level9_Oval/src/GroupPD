@@ -1,0 +1,867 @@
+85% of storage used … If you run out, you can't create, edit, and upload files. Share 100 GB of storage with your family members for ₱49 for 2 months ₱119.
+package Q2;
+
+// Paller
+// Daned
+// Jonson
+
+
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class GroupPD implements KeyListener{
+    
+    class InvalidMovementKeyException extends Exception {
+        public InvalidMovementKeyException(String message) {
+            super(message);
+        }
+    }
+    
+    JFrame frame;
+    ImageIcon playerIcon1;
+    ImageIcon playerIcon2;
+    ImageIcon playerIcon3;
+    ImageIcon playerIcon4;
+    ImageIcon playerIcon5;
+    ImageIcon playerIcon6;
+    ImageIcon playerIcon7;
+    ImageIcon playerIcon8;
+    ImageIcon playerIcon9;
+    ImageIcon playerIcon10;
+    ImageIcon playerIcon11;
+    ImageIcon playerIcon12;
+    ImageIcon oldman;
+    ImageIcon tile1;
+    ImageIcon tree1;
+    ImageIcon flower1;
+    ImageIcon snake1;
+    ImageIcon snake2;
+    ImageIcon portal1;
+    ImageIcon portal2;
+    int charPlace[];
+    int mapLayout[];
+    int mapWidth=12;
+    int mapHeight=12;
+    int frameWidth=1050;
+    int frameHeight=1050;
+    int charac;
+    int charX;
+    int charY;
+    int characterMode;
+    int worldWidth = 36;
+    int worldHeight = 36;
+    int[] world = new int[worldWidth * worldHeight];
+    int viewWidth = 12;
+    int viewHeight = 12;
+    JLabel[] tiles = new JLabel[viewWidth * viewHeight];
+    JLabel[] character = new JLabel[viewWidth * viewHeight];
+    JLabel snakeLabel;
+    int camX = 0;   // world column of top-left camera tile
+    int camY = 0;   // world row of top-left camera tile
+    int playerIndex;     // index in the WORLD
+    int playerX = 6;         // world column
+    int playerY = 6;         // world row
+    int tempX = 0;
+    int tempY = 0;
+    int keyc = 6;
+    int tree1n = 0;
+    int tree2n = 0;
+    int tree3n = 0;
+    int tree4n = 0;
+    int tree5n = 0;
+    int tree6n = 0;
+    int tree7n = 0;
+    int tree8n = 0;
+    int GRASS = 0;
+    int TREE = 1;
+    int FLOWER = 2;
+    int SNAKE = 3;
+    int OLDMAN = 4;
+    int PORTAL = 5;
+    int snakess = 0;
+    int portall = 0;
+    int direction = 0; // 0=down, 1=left, 2=right, 3=up
+    int animFrame = 0; // 0=idle, 1=walk1, 2=walk2
+    int walkStep = 0;
+    int wincon = 0;
+    
+    ImageIcon getPlayerFrame() {
+    switch (direction) {
+        case 0: // DOWN
+            if (animFrame == 1) return playerIcon2;
+            if (animFrame == 2) return playerIcon3;
+            return playerIcon1;
+
+        case 1: // LEFT
+            if (animFrame == 1) return playerIcon5;
+            if (animFrame == 2) return playerIcon6;
+            return playerIcon4;
+
+        case 2: // RIGHT
+            if (animFrame == 1) return playerIcon8;
+            if (animFrame == 2) return playerIcon9;
+            return playerIcon7;
+
+        case 3: // UP
+            if (animFrame == 1) return playerIcon11;
+            if (animFrame == 2) return playerIcon12;
+            return playerIcon10;
+        }   
+        return playerIcon1; // fallback
+    }
+    int c;
+
+    int worldIndex(int x, int y) {
+        return y * worldWidth + x;
+    }
+    int viewIndex(int x, int y) {
+        return y * viewWidth + x;
+    }
+
+    public GroupPD() {
+        frame = new JFrame();
+        charX=-1;
+        charY=-1;
+        characterMode=0;
+        
+        tile1 = new ImageIcon("Images/tile1.png");
+        tree1 = new ImageIcon("Images/tree1.png");
+        flower1 = new ImageIcon("Images/tree2.png");
+        
+        //downwards animation
+        playerIcon1=new ImageIcon("Images/boyidle1.png");
+        playerIcon2=new ImageIcon("Images/boywalk1.png");
+        playerIcon3=new ImageIcon("Images/boywalk2.png");
+        
+        //left animation
+        playerIcon4=new ImageIcon("Images/boyidle2.png");
+        playerIcon5=new ImageIcon("Images/boywalk4.png");
+        playerIcon6=new ImageIcon("Images/boywalk8.png");
+        
+        //right animation
+        playerIcon7=new ImageIcon("Images/boyidle3.png");
+        playerIcon8=new ImageIcon("Images/boywalk3.png");
+        playerIcon9=new ImageIcon("Images/boywalk7.png");
+        
+        //upwards animation
+        playerIcon10=new ImageIcon("Images/boyidle4.png");
+        playerIcon11=new ImageIcon("Images/boywalk5.png");
+        playerIcon12=new ImageIcon("Images/boywalk6.png");
+        
+        snake1=new ImageIcon("Images/snake1.png");
+        snake2=new ImageIcon("Images/snake2.png");
+        oldman=new ImageIcon("Images/oldman.png");
+        portal1=new ImageIcon("Images/portal1.png");
+        portal2=new ImageIcon("Images/portal2.png");
+        
+        playerIcon1=new ImageIcon(playerIcon1.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon2=new ImageIcon(playerIcon2.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon3=new ImageIcon(playerIcon3.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon4=new ImageIcon(playerIcon4.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon5=new ImageIcon(playerIcon5.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon6=new ImageIcon(playerIcon6.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon7=new ImageIcon(playerIcon7.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon8=new ImageIcon(playerIcon8.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon9=new ImageIcon(playerIcon9.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon10=new ImageIcon(playerIcon10.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon11=new ImageIcon(playerIcon11.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon12=new ImageIcon(playerIcon12.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        
+        tile1=new ImageIcon(tile1.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        tree1 = new ImageIcon(tree1.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        flower1 = new ImageIcon(flower1.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        snake1 = new ImageIcon(snake1.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        snake2 = new ImageIcon(snake2.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        oldman = new ImageIcon(oldman.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        portal1 = new ImageIcon(portal1.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        portal2 = new ImageIcon(portal2.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        
+        try {
+            for (int i = 0; i < world.length; i++) {
+                world[i] = 0;
+            }
+            world[worldIndex(6, 3)] = 4;
+            world[worldIndex(7, 3)] = 5;
+            world[worldIndex(3, 5)] = 1;
+            world[worldIndex(6, 9)] = 1;
+            world[worldIndex(8, 4)] = 1;
+            world[worldIndex(5, 6)] = 1;
+            world[worldIndex(11, 11)] = 1;
+
+            world[worldIndex(35, 5)] = 1;
+            world[worldIndex(26, 7)] = 1;
+            world[worldIndex(30, 11)] = 1;
+            world[worldIndex(28, 4)] = 1;
+            world[worldIndex(32, 0)] = 1;
+
+            world[worldIndex(13, 5)] = 1;
+            world[worldIndex(15, 7)] = 1;
+            world[worldIndex(20, 11)] = 1;
+            world[worldIndex(24, 4)] = 1;
+            world[worldIndex(22, 0)] = 1;
+
+            world[worldIndex(0, 33)] = 1;
+            world[worldIndex(7, 35)] = 1;
+            world[worldIndex(5, 26)] = 1;
+            world[worldIndex(9, 28)] = 1;
+            world[worldIndex(11, 30)] = 1;
+
+            world[worldIndex(33, 33)] = 1;
+            world[worldIndex(26, 35)] = 1;
+            world[worldIndex(30, 26)] = 1;
+            world[worldIndex(35, 28)] = 1;
+            world[worldIndex(28, 30)] = 1;
+
+            world[worldIndex(13, 35)] = 1;
+            world[worldIndex(15, 33)] = 1;
+            world[worldIndex(20, 28)] = 1;
+            world[worldIndex(24, 26)] = 1;
+            world[worldIndex(22, 30)] = 1;
+
+            world[worldIndex(3, 25)] = 1;
+            world[worldIndex(6, 20)] = 1;
+            world[worldIndex(8, 16)] = 1;
+            world[worldIndex(5, 14)] = 1;
+            world[worldIndex(11, 23)] = 1;
+
+            world[worldIndex(33, 23)] = 1;
+            world[worldIndex(26, 20)] = 1;
+            world[worldIndex(30, 14)] = 1;
+            world[worldIndex(50, 17)] = 1;
+            world[worldIndex(28, 13)] = 1;
+
+            world[worldIndex(22, 23)] = 1;
+            world[worldIndex(24, 18)] = 1;
+            world[worldIndex(14, 14)] = 1;
+            world[worldIndex(17, 17)] = 1;
+            world[worldIndex(18, 18)] = 3;
+            world[worldIndex(16, 13)] = 1;
+
+        }
+        catch (ArrayIndexOutOfBoundsException ex) {
+            JOptionPane.showMessageDialog(frame,"Tile placed outside world bounds.","Array Error",JOptionPane.ERROR_MESSAGE);
+        }
+        
+        character=new JLabel[mapWidth*mapHeight];
+        charPlace=new int[]{
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,1,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+        };
+        for(int i=0;i<character.length;i++){
+            if(charPlace[i]==1){
+                character[i]=new JLabel(playerIcon1);
+                charac=i;
+            }
+            else character[i]=new JLabel();
+        }
+
+        tiles=new JLabel[mapWidth*mapHeight];
+        mapLayout=new int[]{
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+        };
+        for(int i=0;i<tiles.length;i++){
+            if(mapLayout[i]==0) tiles[i]=new JLabel(tile1);
+        }
+
+
+    }
+    public void MainCodeBlock() {
+        frame.setLayout(new GraphPaperLayout(new Dimension(mapWidth, mapHeight)));
+
+        int x=0, y=0, w=1, h=1;
+        for(int i=0;i<character.length;i++){
+            frame.add(character[i], new Rectangle(x,y,w,h));
+            x++;
+            if(x%mapWidth==0){
+                x=0;
+                y++;
+            }
+        }
+        
+        x=0; y=0; w=1; h=1;
+        for(int i=0;i<tiles.length;i++){
+            frame.add(tiles[i], new Rectangle(x,y,w,h));
+            x++;
+            if(x%mapWidth==0){
+                x=0;
+                y++;
+            }
+        }
+        frame.setSize(frameWidth,frameHeight);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setResizable(false);
+        frame.setVisible(true);
+        frame.addKeyListener(this);
+        
+        render(snakess, portall);
+        
+    }
+    
+    public void movePlayer(int dx, int dy) {
+        int nx = playerX + dx;
+        int ny = playerY + dy;
+
+        // bounds check
+        if (nx < 0 || ny < 0 || nx >= worldWidth || ny >= worldHeight) {
+            animFrame = 0;   // idle
+            walkStep = 0;
+            render(snakess, portall);
+            return;
+        }
+
+        // TREE / SNAKE COLLISION CHECK
+        if (isBlocked(nx, ny)) {
+            animFrame = 0;   // idle
+            walkStep = 0;
+            render(snakess, portall);
+            return;
+        }
+
+        
+        //move player
+        playerX = nx;
+        playerY = ny;
+        
+        // animation logic
+        if (direction == 1 || direction == 2) {
+            // left - right
+            walkStep++;
+
+            if (walkStep == 1) animFrame = 1;      // walk1
+            else if (walkStep == 2) animFrame = 0; // idle
+            else if (walkStep == 3) animFrame = 2; // walk2
+            else {
+                animFrame = 0;
+                walkStep = 0;
+            }
+        } else {
+            // up - down
+            animFrame++;
+            if (animFrame > 2) animFrame = 1;
+        }
+
+
+
+
+        // move camera so player stays near middle
+        camX = playerX - viewWidth / 2;
+        camY = playerY - viewHeight / 2;
+
+        // clamp camera bounds
+        if (camX < 0) camX = 0;
+        if (camY < 0) camY = 0;
+        if (camX > worldWidth - viewWidth) camX = worldWidth - viewWidth;
+        if (camY > worldHeight - viewHeight) camY = worldHeight - viewHeight;
+
+        render(snakess, portall);
+    }
+
+
+    public void render(int snakep, int portalp) {
+    for (int vy = 0; vy < viewHeight; vy++) {
+        for (int vx = 0; vx < viewWidth; vx++) {
+
+            int wx = camX + vx;
+            int wy = camY + vy;
+
+            int wIndex = worldIndex(wx, wy);
+            int vIndex = viewIndex(vx, vy);
+
+            // draw tile based on world value
+            if (world[wIndex] == 0) {
+                tiles[vIndex].setIcon(tile1);   // grass
+            } else if (world[wIndex] == 1) {
+                tiles[vIndex].setIcon(tree1);   // tree
+            } else if (world[wIndex] == 2) {
+                tiles[vIndex].setIcon(flower1);   // hive tree
+            } else if (world[wIndex] == 3) {
+                if (snakep == 0) {
+                    tiles[vIndex].setIcon(snake1);   // snake stone
+                }
+                else {
+                    tiles[vIndex].setIcon(snake2);   // snake
+                }
+            } else if (world[wIndex] == 4) {
+                tiles[vIndex].setIcon(oldman);    //old man
+            } else if (world[wIndex] == 5) {
+                if (portalp == 0) {
+                    tiles[vIndex].setIcon(portal1);   // snake stone
+                }
+                else {
+                    tiles[vIndex].setIcon(portal2);   // snake
+                }
+            }
+
+            character[vIndex].setIcon(null);
+
+            // draw player if here
+            if (wx == playerX && wy == playerY)
+                character[vIndex].setIcon(getPlayerFrame());
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        GroupPD yes = new GroupPD();
+        yes.MainCodeBlock();
+    }
+    public boolean isBlocked(int x, int y) {
+        int index = worldIndex(x, y);
+        return world[index] == TREE || world[index] == SNAKE || world[index] == FLOWER || world[index] == OLDMAN || world[index] == PORTAL;
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        try {
+
+            int key = e.getKeyCode();
+            
+            if (key == KeyEvent.VK_W || key == KeyEvent.VK_A || key == KeyEvent.VK_S || key == KeyEvent.VK_D) {
+
+                throw new InvalidMovementKeyException("Use Arrow Keys only.");
+            }
+
+            if (key == KeyEvent.VK_RIGHT) {
+                direction = 2;
+                movePlayer(1, 0);
+            }
+            if (key == KeyEvent.VK_LEFT) {
+                direction = 1;
+                movePlayer(-1, 0);
+            }
+            if (key == KeyEvent.VK_DOWN) {
+                direction = 0;
+                movePlayer(0, 1);
+            }
+            if (key == KeyEvent.VK_UP) {
+                direction = 3;
+                movePlayer(0, -1);
+            }
+        }
+        catch (InvalidMovementKeyException ex) {
+            JOptionPane.showMessageDialog(frame, ex.getMessage());
+        }
+        
+
+
+        //Get x and y values in real time
+        System.out.println(playerX + " " + playerY);
+        
+        //Interaction
+        if ((playerX == 6 && playerY == 4)||(playerX == 7 && playerY == 3)||(playerX == 6 && playerY == 2)||(playerX == 5 && playerY == 3)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                if (wincon == 0) {
+                    new Thread(() -> {
+                    boolean correct = new interaction().startdainteraction();
+                    }).start(); 
+                }
+                else if (wincon == 1) {
+                    new Thread(() -> {
+                    boolean correct = new interaction2().startdainteraction2();
+                    }).start(); 
+                }
+                else if (wincon == 2) {
+                    new Thread(() -> {
+                    boolean correct = new interaction3().startdainteraction3();
+                    }).start(); 
+                }
+                
+            }
+        }
+        
+        //First Tree Key (top left)
+        if ((playerX == 6 && playerY == 8)||(playerX == 5 && playerY == 9)||(playerX == 6 && playerY == 10)||(playerX == 7 && playerY == 9)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if(tree1n == 0) {
+                    new Thread(() -> {
+                        boolean correct = new chunk1q().startdaquestion1();
+                        if (correct) {
+                            keyc++;
+                            JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            tree1n++;
+                        } else {
+                            c = (int)(Math.random()*10+1);
+                            JOptionPane.showMessageDialog(frame, "Oh no! You were too reckless and the rat was startled!", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            if (c >= 1 && c <=4) {
+                                JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                tree1n++; //here
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(frame, "The Rat decided to choose violence.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                new Thread(() -> {
+                                    boolean won = new battleMockUp2().startBattleAndWait2();
+                                    if (won) {
+                                        keyc++;
+                                        JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree1n++; //here
+                                    } else {
+                                        JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree1n++; //here
+                                    }
+                                }).start();
+                            }
+                        }
+                    }).start();
+
+                    
+                }
+
+           }
+        }
+
+        //Second Tree Key (top right)
+        if ((playerX == 26 && playerY == 8)||(playerX == 27 && playerY == 7)||(playerX == 26 && playerY == 6)||(playerX == 25 && playerY == 7)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if(tree2n == 0) {
+                    new Thread(() -> {
+                        boolean correct = new chunk2q().startdaquestion2();
+
+                        if (correct) {
+                            keyc++;
+                            JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            tree2n++;
+                        } else {
+                            c = (int)(Math.random()*10+1);
+                            JOptionPane.showMessageDialog(frame, "Oh no! You were too reckless and the rat was startled!", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            if (c >= 1 && c <=4) {
+                                JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                tree2n++; //here
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(frame, "The Rat decided to choose violence.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                new Thread(() -> {
+                                    boolean won = new battleMockUp2().startBattleAndWait2();
+                                    if (won) {
+                                        keyc++;
+                                        JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree2n++; //here
+                                    } else {
+                                        JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree2n++; //here
+                                    }
+                                }).start();
+                            }
+                        }
+                    }).start();
+                }
+            }
+        }
+
+        //Third Tree Key (middle left)
+        if ((playerX == 6 && playerY == 19)||(playerX == 7 && playerY == 20)||(playerX == 6 && playerY == 21)||(playerX == 5 && playerY == 20)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if(tree3n == 0) {
+                    new Thread(() -> {
+                        boolean correct = new chunk3q().startdaquestion3();
+
+                        if (correct) {
+                            keyc++;
+                            JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            tree3n++;
+                        } else {
+                            c = (int)(Math.random()*10+1);
+                            JOptionPane.showMessageDialog(frame, "Oh no! You were too reckless and the rat was startled!", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            if (c >= 1 && c <=4) {
+                                JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                tree3n++; //here
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(frame, "The Rat decided to choose violence.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                new Thread(() -> {
+                                    boolean won = new battleMockUp2().startBattleAndWait2();
+                                    if (won) {
+                                        keyc++;
+                                        JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree3n++; //here
+                                    } else {
+                                        JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree3n++; //here
+                                    }
+                                }).start();
+                            }
+                        }
+                    }).start();
+                }
+            }
+        }
+
+        //Fourth Tree Key (middle middle)
+        if ((playerX == 17 && playerY == 18)||(playerX == 16 && playerY == 17)||(playerX == 17 && playerY == 16)||(playerX == 18 && playerY == 17)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if(tree4n == 0) {
+                    new Thread(() -> {
+                        boolean correct = new chunk4q().startdaquestion4(); //
+
+                        if (correct) {
+                            keyc++;
+                            JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            tree4n++; //
+                        } else {
+                            c = (int)(Math.random()*10+1);
+                            JOptionPane.showMessageDialog(frame, "Oh no! You were too reckless and the rat was startled!", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            if (c >= 1 && c <=4) {
+                                JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                tree4n++; //here
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(frame, "The Rat decided to choose violence.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                new Thread(() -> {
+                                    boolean won = new battleMockUp2().startBattleAndWait2();
+                                    if (won) {
+                                        keyc++;
+                                        JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree4n++; //here
+                                    } else {
+                                        JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree4n++; //here
+                                    }
+                                }).start();
+                            }
+                        }
+                    }).start();
+                }
+            }
+        }
+
+        //Fifth Tree Key (middle right)
+        if ((playerX == 26 && playerY == 19)||(playerX == 27 && playerY == 20)||(playerX == 26 && playerY == 21)||(playerX == 25 && playerY == 20)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if(tree5n == 0) {
+                    new Thread(() -> {
+                        boolean correct = new chunk5q().startdaquestion5(); //
+
+                        if (correct) {
+                            keyc++;
+                            JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            tree5n++; //
+                        } else {
+                            c = (int)(Math.random()*10+1);
+                            JOptionPane.showMessageDialog(frame, "Oh no! You were too reckless and the rat was startled!", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            if (c >= 1 && c <=4) {
+                                JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                tree5n++; //here
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(frame, "The Rat decided to choose violence.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                new Thread(() -> {
+                                    boolean won = new battleMockUp2().startBattleAndWait2();
+                                    if (won) {
+                                        keyc++;
+                                        JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree5n++; //here
+                                    } else {
+                                        JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree5n++; //here
+                                    }
+                                }).start();
+                            }
+                        }
+                    }).start();
+                }
+            }
+        }
+
+        //Sixth Tree Key (bottom right)
+        if ((playerX == 33 && playerY == 32)||(playerX == 32 && playerY == 33)||(playerX == 33 && playerY == 34)||(playerX == 34 && playerY == 33)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if(tree6n == 0) {
+                    new Thread(() -> {
+                        boolean correct = new chunk6q().startdaquestion6(); //
+
+                        if (correct) {
+                            keyc++;
+                            JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            tree6n++; //
+                        } else {
+                            c = (int)(Math.random()*10+1);
+                            JOptionPane.showMessageDialog(frame, "Oh no! You were too reckless and the rat was startled!", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            if (c >= 1 && c <=4) {
+                                JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                tree6n++; //here
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(frame, "The Rat decided to choose violence.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                new Thread(() -> {
+                                    boolean won = new battleMockUp2().startBattleAndWait2();
+                                    if (won) {
+                                        keyc++;
+                                        JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree6n++; //here
+                                    } else {
+                                        JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree6n++; //here
+                                    }
+                                }).start();
+                            }
+                        }
+                    }).start();
+                }
+            }
+        }
+
+        //Seventh Tree Key (bottom middle)
+        if ((playerX == 24 && playerY == 27)||(playerX == 23 && playerY == 26)||(playerX == 24 && playerY == 25)||(playerX == 25 && playerY == 26)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if(tree7n == 0) {
+                    new Thread(() -> {
+                        boolean correct = new chunk7q().startdaquestion7(); //
+
+                        if (correct) {
+                            keyc++;
+                            JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            tree7n++; //
+                        } else {
+                            c = (int)(Math.random()*10+1);
+                            JOptionPane.showMessageDialog(frame, "Oh no! You were too reckless and the rat was startled!", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            if (c >= 1 && c <=4) {
+                                JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                tree7n++; //here
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(frame, "The Rat decided to choose violence.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                new Thread(() -> {
+                                    boolean won = new battleMockUp2().startBattleAndWait2();
+                                    if (won) {
+                                        keyc++;
+                                        JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree7n++; //here
+                                    } else {
+                                        JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree7n++; //here
+                                    }
+                                }).start();
+                            }
+                        }
+                    }).start();
+                }
+            }
+        }
+
+        //Eighth Tree Key (bottom left)
+        if ((playerX == 6 && playerY == 35)||(playerX == 7 && playerY == 34)||(playerX == 8 && playerY == 35)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if(tree8n == 0) {
+                    new Thread(() -> {
+                        boolean correct = new chunk8q().startdaquestion8(); //
+
+                        if (correct) {
+                            keyc++;
+                            JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            tree8n++; //
+                        } else {
+                            c = (int)(Math.random()*10+1);
+                            JOptionPane.showMessageDialog(frame, "Oh no! You were too reckless and the rat was startled!", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                            if (c >= 1 && c <=4) {
+                                JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                tree8n++; //here
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(frame, "The Rat decided to choose violence.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                new Thread(() -> {
+                                    boolean won = new battleMockUp2().startBattleAndWait2();
+                                    if (won) {
+                                        keyc++;
+                                        JOptionPane.showMessageDialog(frame, "You found a Rat! " + keyc + "/6 Rats found.", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree8n++; //here
+                                    } else {
+                                        JOptionPane.showMessageDialog(frame, "The Rat scurried away..", "Oh! A Rat!", JOptionPane.INFORMATION_MESSAGE);
+                                        tree8n++; //here
+                                    }
+                                }).start();
+                            }
+                        }
+                    }).start();
+                }
+            }
+        }
+
+        //Snake Summon
+        if ((playerX == 18 && playerY == 19)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if(keyc >= 6) {
+                    if (snakess == 0) {
+                        JOptionPane.showMessageDialog(frame, "You hear a slight rumbling noise..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        snakess++;
+                    }
+                }
+            }
+        }
+        
+        //Snake Battle
+        if ((playerX == 18 && playerY == 19)) {
+            if(e.getKeyCode() == KeyEvent.VK_K){
+                if(snakess == 1) {
+                    new Thread(() -> {
+                        boolean won = new battleMockUp().startBattleAndWait();
+
+                        if (won) {
+                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            wincon++;
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    }).start();
+                }
+            }
+        }
+        
+        //Portal Open
+        if ((playerX == 7 && playerY == 4)||(playerX == 8 && playerY == 3)||(playerX == 7 && playerY == 2)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if(wincon == 1) {
+                    JOptionPane.showMessageDialog(frame, "The portal has started to open..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                    portall++;
+                    wincon++;
+                    System.out.println(wincon);
+                }
+            }
+        }
+        
+        if ((playerX == 7 && playerY == 4)||(playerX == 8 && playerY == 3)||(playerX == 7 && playerY == 2)) {
+            if(e.getKeyCode() == KeyEvent.VK_K){
+                if(wincon == 2) {
+                    frame.dispose();
+                    JOptionPane.showMessageDialog(frame, "You have escaped!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        }
+    }
+
+    
+    @Override
+    public void keyReleased(KeyEvent e) {
+    }
+
+
+
+    }
