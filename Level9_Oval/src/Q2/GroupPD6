@@ -420,48 +420,64 @@ public class GroupPD6 implements KeyListener, ActionListener{
             JOptionPane.showMessageDialog(frame,"Tile placed outside world bounds.","Array Error",JOptionPane.ERROR_MESSAGE);
         }
         
-        
-        character=new JLabel[mapWidth*mapHeight];
-        charPlace=new int[]{
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,1,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-        };
-        for(int i=0;i<character.length;i++){
-            if(charPlace[i]==1){
-                character[i]=new JLabel(playerIcon1);
-                charac=i;
+        try {
+            character=new JLabel[mapWidth*mapHeight];
+            charPlace=new int[]{
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,1,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0
+            };
+            if(charPlace.length != mapWidth * mapHeight){
+                throw new ArrayIndexOutOfBoundsException("Map size is incorrect");
             }
-            else character[i]=new JLabel();
+            for(int i=0;i<character.length;i++){
+                if(charPlace[i]==1){
+                    character[i]=new JLabel(playerIcon1);
+                    charac=i;
+                }
+                else character[i]=new JLabel();
+            }
         }
-
-        tiles=new JLabel[mapWidth*mapHeight];
-        mapLayout=new int[]{
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,
-        };
-        for(int i=0;i<tiles.length;i++){
-            if(mapLayout[i]==0) tiles[i]=new JLabel(tile1);
+        catch(ArrayIndexOutOfBoundsException ex) {
+            JOptionPane.showMessageDialog(frame,"Map size for character is incorrect","Error",JOptionPane.ERROR_MESSAGE);
         }
+        
+        try {
+            tiles=new JLabel[mapWidth*mapHeight];
+            mapLayout=new int[]{
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0
+            };
+            if(mapLayout.length != mapWidth * mapHeight){
+                throw new ArrayIndexOutOfBoundsException("Map size is incorrect");
+            }
+            for(int i=0;i<tiles.length;i++){
+                if(mapLayout[i]==0) tiles[i]=new JLabel(tile1);
+            }
+        }
+        catch(ArrayIndexOutOfBoundsException ex) {
+            JOptionPane.showMessageDialog(frame,"Map size for character is incorrect","Error",JOptionPane.ERROR_MESSAGE);
+        }
+        
 
 
     }
