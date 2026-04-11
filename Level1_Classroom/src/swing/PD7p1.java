@@ -1,9 +1,10 @@
 package swing;
 //Other members: Maia Adelle Soyao & Zionne Kay Babia
-
+import java.io.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.Timer;
 
 public class PD7p1 implements KeyListener{
     JFrame frame;
@@ -50,6 +51,12 @@ public class PD7p1 implements KeyListener{
     boolean historylock = false;
     boolean trivialock = false;
     boolean trivia2lock = false;
+    long startTime;
+    private int timeLeft = 120;  // seconds
+    private int retries = 0;
+    private Timer countdownTimer;
+    private JLabel retryLabel;     // To show retries at top-left
+    private JLabel timerLabel;     // To show countdown at top-right
    
     public PD7p1(){
         frame=new JFrame();
@@ -148,9 +155,130 @@ public class PD7p1 implements KeyListener{
             }
         }
     }
+    
+   public void showIntroScreen(Runnable afterIntro) {
+        JFrame introFrame = new JFrame();
+        introFrame.setSize(frameWidth, frameHeight);
+        introFrame.setUndecorated(true);
+        introFrame.setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel();
+        panel.setBackground(Color.BLACK);
+        panel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+
+        JTextArea textArea = new JTextArea();
+        textArea.setForeground(Color.GREEN);
+        textArea.setBackground(Color.BLACK);
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 20));
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setBorder(null);
+        panel.add(scrollPane, gbc);
+
+        JButton continueButton = new JButton("Continue");
+        continueButton.setFont(new Font("Monospaced", Font.BOLD, 18));
+        continueButton.setVisible(false);
+        gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weighty = 0;
+        panel.add(continueButton, gbc);
+
+        introFrame.add(panel);
+        introFrame.setVisible(true);
+
+        String text1 = "OBJECTIVE:\n\n"
+                     + "Move the character using the arrow keys.\n"
+                     + "There are questions on the tables around the map.\n\n"
+                     + "Answer all 5 questions, find the correct tables.\n"
+                     + "You can check your score on the teacher's table.\n"
+                     + "Each question can only be answered once.\n\n"
+                     + "To pass the level:\n"
+                     + "- Get at least 60%\n"
+                     + "- Go to the teacher's table";
+
+        String text2 = "YOU HAVE 2 MINUTES.\nGoodluck.";
+
+        class TypeWriter {
+            private JTextArea textArea;
+            private Timer timer;
+            private String fullText;
+            private int index;
+
+            public TypeWriter(JTextArea textArea) {
+                this.textArea = textArea;
+            }
+
+            public void start(String text, Runnable onFinish) {
+                this.fullText = text;
+                this.index = 0;
+                textArea.setText(""); // clear previous
+                timer = new Timer(50, null);
+                timer.addActionListener(e -> {
+                    if (index < fullText.length()) {
+                        textArea.append("" + fullText.charAt(index));
+                        index++;
+                        textArea.setCaretPosition(textArea.getDocument().getLength()); // scroll down
+                    } else {
+                        timer.stop();
+                        if (onFinish != null) onFinish.run();
+                    }
+                });
+                timer.start();
+            }
+        }
+
+        TypeWriter typeWriter = new TypeWriter(textArea);
+
+        // First text sequence
+        typeWriter.start(text1, () -> continueButton.setVisible(true));
+
+        continueButton.addActionListener(e -> {
+            continueButton.setVisible(false);
+
+            // Second text centered
+            textArea.setFont(new Font("Monospaced", Font.BOLD, 28)); // bigger for emphasis
+            textArea.setLineWrap(false);
+            textArea.setWrapStyleWord(false);
+            textArea.setAlignmentX(JTextArea.CENTER_ALIGNMENT);
+            textArea.setAlignmentY(JTextArea.CENTER_ALIGNMENT);
+
+            typeWriter.start(text2, () -> continueButton.setVisible(true));
+
+            continueButton.addActionListener(ev -> {
+                introFrame.dispose();
+                afterIntro.run(); // start actual game
+            });
+        });
+    }
    
     public void setFrame(){
         frame.setLayout(new GraphPaperLayout(new Dimension(mapWidth,mapHeight)));
+        JPanel hudPanel = new JPanel(null); // absolute layout for label
+        hudPanel.setOpaque(false);          // so it doesn’t cover the tiles
+        hudPanel.setBounds(0, 0, frameWidth, frameHeight); // overlay the whole frame
+
+        retryLabel = new JLabel("Retries: 0");
+        retryLabel.setForeground(Color.BLACK);
+        retryLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        retryLabel.setBounds(10, 10, 100, 20); // top-left
+        hudPanel.add(retryLabel);
+
+        timerLabel = new JLabel("Time: 2:00");
+        timerLabel.setForeground(Color.BLACK);
+        timerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        timerLabel.setBounds(frameWidth - 100, 10, 100, 20); // top-right
+        hudPanel.add(timerLabel);
+
         
         int x=0, y=0, w=1, h=1;
         for(int i=0;i<character.length;i++){
@@ -171,27 +299,43 @@ public class PD7p1 implements KeyListener{
                 y++;
             }
         }
-
+        frame.add(hudPanel); // add it **after** tiles and characters
         
         frame.setSize(frameWidth,frameHeight);
+        retryLabel.setForeground(Color.BLACK);
+        retryLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        retryLabel.setBounds(10, 10, 100, 20); // top-left
+
+        timerLabel.setForeground(Color.BLACK);
+        timerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        timerLabel.setBounds(frameWidth - 100, 10, 100, 20); // top-right
+        countdownTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                timeLeft--;
+                int minutes = timeLeft / 60;
+                int seconds = timeLeft % 60;
+                timerLabel.setText(String.format("Time: %d:%02d", minutes, seconds));
+                hudPanel.repaint(); // force repaint of the labels
+
+                if (timeLeft <= 0) {
+                    countdownTimer.stop();
+                    retries++;
+                    retryLabel.setText("Retries: " + retries);
+                    resetLevel();
+                    timeLeft = 120;
+                    countdownTimer.start();
+                }
+            }
+        });
+        countdownTimer.start();
+        JLayeredPane layeredPane = frame.getLayeredPane();
+        hudPanel.setBounds(0, 0, frameWidth, frameHeight);
+        layeredPane.add(hudPanel, JLayeredPane.PALETTE_LAYER); // top layer
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setResizable(false);
-        
-        JOptionPane.showMessageDialog(
-            frame,
-            "OBJECTIVE\n\n"
-            + "Move the character using the arrow keys.\n"
-            + "There are questions on the tables around the map.\n\n"
-            + "Answer all 5 questions, find the correct tables.\n"
-            + "You can check your score on the teacher's table.\n"
-            + "Each question can only be answered once.\n\n"
-            + "To pass the level:\n"
-            + "- Get at least 60%\n"
-            + "- Go to the teacher's table",
-            "Game Objective",
-            JOptionPane.INFORMATION_MESSAGE
-        );
+        startTime = System.currentTimeMillis();
         
         frame.addKeyListener(this);
     }
@@ -442,8 +586,8 @@ public class PD7p1 implements KeyListener{
                     JOptionPane.INFORMATION_MESSAGE
                 );
                 return;
-    }
-            
+            }
+
             if (correctAnswers >= 3) {
                 JOptionPane.showMessageDialog(
                     frame,
@@ -451,11 +595,16 @@ public class PD7p1 implements KeyListener{
                     "Level Complete",
                     JOptionPane.INFORMATION_MESSAGE
                 );
-                frame.dispose(); //close current game
-                PD7p2 nextLevel = new PD7p2();
-                nextLevel.setFrame();
-            } 
-            else {
+
+                long finishTime = System.currentTimeMillis() - startTime;
+                saveFastestTime(finishTime);
+                saveScore(correctAnswers); // saves the score to score.txt
+                frame.dispose();
+                PD7p2 level2 = new PD7p2(finishTime, attempts, correctAnswers*100/5);
+                level2.showLevel2Intro(finishTime, attempts, correctAnswers*100/5, () -> {
+                    level2.setFrame(); // start level 2 after intro
+                });
+            } else {
                 JOptionPane.showMessageDialog(
                     frame,
                     "You failed! You only got " + (correctAnswers*100/5) + "%!",
@@ -467,7 +616,46 @@ public class PD7p1 implements KeyListener{
         }
     }
 
-    
+    public void saveFastestTime(long timeMillis) {
+        try {
+            File file = new File("fastestTime.txt");
+            long bestTime = Long.MAX_VALUE;
+
+            if(file.exists()) {
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                String line = br.readLine();
+                if(line != null && !line.isEmpty()) {
+                    bestTime = Long.parseLong(line);
+                }
+                br.close();
+            }
+
+            if(timeMillis < bestTime) {
+                BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+                bw.write(String.valueOf(timeMillis));
+                bw.close();
+                JOptionPane.showMessageDialog(frame, 
+                    "New record! Fastest time: " + timeMillis/1000.0 + " seconds.", 
+                    "Fastest Time", 
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } catch(IOException | NumberFormatException e) {
+            JOptionPane.showMessageDialog(frame, "Error saving fastest time.", "File Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Save points/score
+    public void saveScore(int points) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("score.txt", true)); // append mode
+            bw.write("Level 1 score: " + points + "\n");
+            bw.close();
+        } catch(IOException e) {
+            JOptionPane.showMessageDialog(frame, "Error saving score.", "File Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     @Override
     public void keyTyped(KeyEvent e) {
         
@@ -538,6 +726,6 @@ public class PD7p1 implements KeyListener{
     }
     public static void main(String[] args) {
         PD7p1 game = new PD7p1();
-        game.setFrame();
+        game.showIntroScreen(() -> game.setFrame());
     }
 }
