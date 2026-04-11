@@ -1,7 +1,7 @@
 package swing;
 //Other members: Maia Adelle Soyao & Zionne Kay Babia
 //This code was AI assisted with corrections in game logic
-
+import java.io.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -37,23 +37,20 @@ class PlayerCharacter extends GameCharacter {
 
 public class PD7p2 implements KeyListener{
     JFrame frame;
-    ImageIcon img1, img2, img3, img4, img5, img6, img7, img8,
-          img9, img10, img11, img12, img13, img14, img15, img16,
-          img17, img18, img19, img20, img21, img22, img23, img24,
-          img25, img26, img27, img28, img29, img30, img31, img32,
-          img33, img34, img35, img36, img37, img38, img39, img40,
-          img41, img42, img43, img44, img45, img46, img47, img48,
-          img49, img50, img51, img52, img53, img54, img55, img56,
-          img57, img58, img59, img60, img61, img62, img63, img64,
-          img65, img66, img67, img68, img69, img70, img71, img72,
-          img73, img74, img75, img76, img77, img78, img79, img80,
-          img81, img82, img83, img84, img85, img86, img87, img88,
-          img89, img90, img91, img92, img93, img94, img95, img96,
-          img97, img98, img99, img100, img101, img102, img103, img104;
-    ImageIcon board;
+    ImageIcon[] tileImages = new ImageIcon[104];
     ImageIcon playerIcon;
+    ImageIcon playerIconfront;
+    ImageIcon playerIconfront2;
+    ImageIcon playerIconback;
+    ImageIcon playerIconback2;
+    ImageIcon playerIconleft;
+    ImageIcon playerIconright;
+    ImageIcon shieldIcon;
     JLabel tiles[];
     JLabel character[];
+    JLabel shieldLabel;
+    JLabel timerLabel;
+    JLabel retryLabel;
     int mapLayout[];
     int onelocation;
     int twolocation;
@@ -69,25 +66,29 @@ public class PD7p2 implements KeyListener{
     int points = 0;
     int attempts = 0;
     int correctAnswers = 0;
+    int tileSize = 90;
+    int frameWidth = tileSize * mapWidth;
+    int frameHeight = tileSize * mapHeight;
+    int characterMode = 1;
+    int cols = 13; 
+    int prevAttempts;
+    int prevScorePercent;
+    int score; 
+    int timeLeft = 120; // 2 minutes
     private int startPosition;
     private PlayerCharacter player;
     boolean q4Answered = false;
     boolean q5Answered = false;
     boolean q8Answered = false;
-    boolean hasKey = false;
     boolean introShown = false;
-    int tileSize = 90;
-    int frameWidth = tileSize * mapWidth;
-    int frameHeight = tileSize * mapHeight;
-    int characterMode = 1;
-    ImageIcon playerIconfront;
-    ImageIcon playerIconfront2;
-    ImageIcon playerIconback;
-    ImageIcon playerIconback2;
-    ImageIcon playerIconleft;
-    ImageIcon playerIconright;
-    int cols = 13; 
+    boolean hasShield = false; 
+    long startTime;
+    Timer countdownTimer;
+    long finishTime;     // For storing the finish time
+    long prevTime;
     
+    
+    String currentDirection = "down";
     /*OBJECTIVE
             Move the character using the arrow keys.
             There are questions on the tables around the map.
@@ -101,128 +102,28 @@ public class PD7p2 implements KeyListener{
             - Escape 
     */
     
-   
-    public PD7p2(){
+    public void setFinishTime(long finishTime) { this.finishTime = finishTime; }
+    public void setAttempts(int attempts) { this.attempts = attempts; }
+    public void setScore(int score) { this.score = score; }
+    public PD7p2(long finishTime, int prevAttempts, int prevScorePercent){
+        this.finishTime = finishTime;
+        this.attempts = prevAttempts;
+        this.score = prevScorePercent;
         frame=new JFrame();
+        startTime = System.currentTimeMillis();
         characterPosition=-1;
         startPosition = characterPosition;
-        img1  = new ImageIcon(new ImageIcon("Images/map/1.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img2  = new ImageIcon(new ImageIcon("Images/map/2.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img3  = new ImageIcon(new ImageIcon("Images/map/3.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img4  = new ImageIcon(new ImageIcon("Images/map/4.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img5  = new ImageIcon(new ImageIcon("Images/map/5.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img6  = new ImageIcon(new ImageIcon("Images/map/6.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img7  = new ImageIcon(new ImageIcon("Images/map/7.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img8  = new ImageIcon(new ImageIcon("Images/map/8.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
+        for (int i = 0; i < tileImages.length; i++) {
+            // Calculate the file name
+            // Note: your files seem to go from 1.png to 104.png
+            int fileNumber = i + 1;
+            String filePath = "Images/map/" + fileNumber + ".png";
 
-        img9  = new ImageIcon(new ImageIcon("Images/map/9.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img10 = new ImageIcon(new ImageIcon("Images/map/10.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img11 = new ImageIcon(new ImageIcon("Images/map/11.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img12 = new ImageIcon(new ImageIcon("Images/map/12.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img13 = new ImageIcon(new ImageIcon("Images/map/13.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img14 = new ImageIcon(new ImageIcon("Images/map/14.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img15 = new ImageIcon(new ImageIcon("Images/map/15.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img16 = new ImageIcon(new ImageIcon("Images/map/16.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-
-        img17 = new ImageIcon(new ImageIcon("Images/map/17.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img18 = new ImageIcon(new ImageIcon("Images/map/18.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img19 = new ImageIcon(new ImageIcon("Images/map/19.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img20 = new ImageIcon(new ImageIcon("Images/map/20.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img21 = new ImageIcon(new ImageIcon("Images/map/21.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img22 = new ImageIcon(new ImageIcon("Images/map/22.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img23 = new ImageIcon(new ImageIcon("Images/map/23.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img24 = new ImageIcon(new ImageIcon("Images/map/24.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-
-        img25 = new ImageIcon(new ImageIcon("Images/map/25.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img26 = new ImageIcon(new ImageIcon("Images/map/26.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img27 = new ImageIcon(new ImageIcon("Images/map/27.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img28 = new ImageIcon(new ImageIcon("Images/map/28.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img29 = new ImageIcon(new ImageIcon("Images/map/29.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img30 = new ImageIcon(new ImageIcon("Images/map/30.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img31 = new ImageIcon(new ImageIcon("Images/map/31.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img32 = new ImageIcon(new ImageIcon("Images/map/32.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-
-        img33 = new ImageIcon(new ImageIcon("Images/map/33.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img34 = new ImageIcon(new ImageIcon("Images/map/34.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img35 = new ImageIcon(new ImageIcon("Images/map/35.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img36 = new ImageIcon(new ImageIcon("Images/map/36.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img37 = new ImageIcon(new ImageIcon("Images/map/37.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img38 = new ImageIcon(new ImageIcon("Images/map/38.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img39 = new ImageIcon(new ImageIcon("Images/map/39.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img40 = new ImageIcon(new ImageIcon("Images/map/40.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-
-        img41 = new ImageIcon(new ImageIcon("Images/map/41.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img42 = new ImageIcon(new ImageIcon("Images/map/42.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img43 = new ImageIcon(new ImageIcon("Images/map/43.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img44 = new ImageIcon(new ImageIcon("Images/map/44.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img45 = new ImageIcon(new ImageIcon("Images/map/45.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img46 = new ImageIcon(new ImageIcon("Images/map/46.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img47 = new ImageIcon(new ImageIcon("Images/map/47.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img48 = new ImageIcon(new ImageIcon("Images/map/48.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-
-        img49 = new ImageIcon(new ImageIcon("Images/map/49.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img50 = new ImageIcon(new ImageIcon("Images/map/50.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img51 = new ImageIcon(new ImageIcon("Images/map/51.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img52 = new ImageIcon(new ImageIcon("Images/map/52.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img53 = new ImageIcon(new ImageIcon("Images/map/53.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img54 = new ImageIcon(new ImageIcon("Images/map/54.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img55 = new ImageIcon(new ImageIcon("Images/map/55.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img56 = new ImageIcon(new ImageIcon("Images/map/56.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-
-        img57 = new ImageIcon(new ImageIcon("Images/map/57.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img58 = new ImageIcon(new ImageIcon("Images/map/58.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img59 = new ImageIcon(new ImageIcon("Images/map/59.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img60 = new ImageIcon(new ImageIcon("Images/map/60.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img61 = new ImageIcon(new ImageIcon("Images/map/61.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img62 = new ImageIcon(new ImageIcon("Images/map/62.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img63 = new ImageIcon(new ImageIcon("Images/map/63.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img64 = new ImageIcon(new ImageIcon("Images/map/64.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-
-        img65 = new ImageIcon(new ImageIcon("Images/map/65.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img66 = new ImageIcon(new ImageIcon("Images/map/66.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img67 = new ImageIcon(new ImageIcon("Images/map/67.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img68 = new ImageIcon(new ImageIcon("Images/map/68.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img69 = new ImageIcon(new ImageIcon("Images/map/69.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img70 = new ImageIcon(new ImageIcon("Images/map/70.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img71 = new ImageIcon(new ImageIcon("Images/map/71.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img72 = new ImageIcon(new ImageIcon("Images/map/72.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-
-        img73 = new ImageIcon(new ImageIcon("Images/map/73.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img74 = new ImageIcon(new ImageIcon("Images/map/74.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img75 = new ImageIcon(new ImageIcon("Images/map/75.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img76 = new ImageIcon(new ImageIcon("Images/map/76.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img77 = new ImageIcon(new ImageIcon("Images/map/77.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img78 = new ImageIcon(new ImageIcon("Images/map/78.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img79 = new ImageIcon(new ImageIcon("Images/map/79.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img80 = new ImageIcon(new ImageIcon("Images/map/80.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-
-        img81 = new ImageIcon(new ImageIcon("Images/map/81.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img82 = new ImageIcon(new ImageIcon("Images/map/82.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img83 = new ImageIcon(new ImageIcon("Images/map/83.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img84 = new ImageIcon(new ImageIcon("Images/map/84.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img85 = new ImageIcon(new ImageIcon("Images/map/85.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img86 = new ImageIcon(new ImageIcon("Images/map/86.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img87 = new ImageIcon(new ImageIcon("Images/map/87.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img88 = new ImageIcon(new ImageIcon("Images/map/88.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-
-        img89 = new ImageIcon(new ImageIcon("Images/map/89.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img90 = new ImageIcon(new ImageIcon("Images/map/90.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img91 = new ImageIcon(new ImageIcon("Images/map/91.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img92 = new ImageIcon(new ImageIcon("Images/map/92.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img93 = new ImageIcon(new ImageIcon("Images/map/93.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img94 = new ImageIcon(new ImageIcon("Images/map/94.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img95 = new ImageIcon(new ImageIcon("Images/map/95.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img96 = new ImageIcon(new ImageIcon("Images/map/96.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img97 = new ImageIcon(new ImageIcon("Images/map/97.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img98 = new ImageIcon(new ImageIcon("Images/map/98.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-
-        img99  = new ImageIcon(new ImageIcon("Images/map/99.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img100 = new ImageIcon(new ImageIcon("Images/map/100.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img101 = new ImageIcon(new ImageIcon("Images/map/101.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img102 = new ImageIcon(new ImageIcon("Images/map/104.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img103 = new ImageIcon(new ImageIcon("Images/map/102.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        img104 = new ImageIcon(new ImageIcon("Images/map/103.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-
+            // Load and scale
+            tileImages[i] = new ImageIcon(
+                new ImageIcon(filePath).getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+        }
         playerIconfront = playerIcon = new ImageIcon(new ImageIcon("Images/player1.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
         playerIconfront2 = new ImageIcon(new ImageIcon("Images/player2.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
         playerIconback  = new ImageIcon(new ImageIcon("Images/player3.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
@@ -230,6 +131,10 @@ public class PD7p2 implements KeyListener{
         playerIconright = new ImageIcon(new ImageIcon("Images/player5.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
         playerIconleft  = new ImageIcon(new ImageIcon("Images/player6.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
         character=new JLabel[mapWidth*mapHeight];
+        int shieldSize = tileSize / 2;
+        shieldIcon = new ImageIcon(new ImageIcon("Images/shield.png").getImage().getScaledInstance(shieldSize, shieldSize, Image.SCALE_SMOOTH));
+        shieldLabel = new JLabel(shieldIcon);
+        shieldLabel.setSize(shieldSize, shieldSize);
         
         characterPlace = new int[]{
             1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -252,51 +157,299 @@ public class PD7p2 implements KeyListener{
             else character[i]=new JLabel();
         }
        
-        tiles = new JLabel[]{
-            new JLabel(img1),  new JLabel(img2),  new JLabel(img3),  new JLabel(img4),  new JLabel(img5),  new JLabel(img6),  new JLabel(img7),  new JLabel(img8),
-            new JLabel(img9),  new JLabel(img10), new JLabel(img11), new JLabel(img12), new JLabel(img13), new JLabel(img14), new JLabel(img15), new JLabel(img16),
-            new JLabel(img17), new JLabel(img18), new JLabel(img19), new JLabel(img20), new JLabel(img21), new JLabel(img22), new JLabel(img23), new JLabel(img24),
-            new JLabel(img25), new JLabel(img26), new JLabel(img27), new JLabel(img28), new JLabel(img29), new JLabel(img30), new JLabel(img31), new JLabel(img32),
-            new JLabel(img33), new JLabel(img34), new JLabel(img35), new JLabel(img36), new JLabel(img37), new JLabel(img38), new JLabel(img39), new JLabel(img40),
-            new JLabel(img41), new JLabel(img42), new JLabel(img43), new JLabel(img44), new JLabel(img45), new JLabel(img46), new JLabel(img47), new JLabel(img48),
-            new JLabel(img49), new JLabel(img50), new JLabel(img51), new JLabel(img52), new JLabel(img53), new JLabel(img54), new JLabel(img55), new JLabel(img56),
-            new JLabel(img57), new JLabel(img58), new JLabel(img59), new JLabel(img60), new JLabel(img61), new JLabel(img62), new JLabel(img63), new JLabel(img64),
-            new JLabel(img65),  new JLabel(img66),  new JLabel(img67),  new JLabel(img68),  new JLabel(img69),  new JLabel(img70),  new JLabel(img71),  new JLabel(img72),
-            new JLabel(img73),  new JLabel(img74),  new JLabel(img75),  new JLabel(img76),  new JLabel(img77),  new JLabel(img78),  new JLabel(img79),  new JLabel(img80),
-            new JLabel(img81),  new JLabel(img82),  new JLabel(img83),  new JLabel(img84),  new JLabel(img85),  new JLabel(img86),  new JLabel(img87),  new JLabel(img88),
-            new JLabel(img89),  new JLabel(img90),  new JLabel(img91),  new JLabel(img92),  new JLabel(img93),  new JLabel(img94),  new JLabel(img95),  new JLabel(img96),
-            new JLabel(img97),  new JLabel(img98),  new JLabel(img99),  new JLabel(img100), new JLabel(img101), new JLabel(img102), new JLabel(img103), new JLabel(img104)
-        };
+        tiles = new JLabel[tileImages.length];
+            for (int i = 0; i < tileImages.length; i++) {
+                tiles[i] = new JLabel(tileImages[i]);
+            }
+    }
+    
+    private void startTimer() {
+        if(countdownTimer != null && countdownTimer.isRunning())
+            countdownTimer.stop();
+
+        timeLeft = 120; // reset time each restart
+        timerLabel.setText("Time: 2:00");
+
+        countdownTimer = new Timer(1000, e -> {
+            timeLeft--;
+            int minutes = timeLeft / 60;
+            int seconds = timeLeft % 60;
+            timerLabel.setText(String.format("Time: %d:%02d", minutes, seconds));
+
+            if(timeLeft <= 0){
+                countdownTimer.stop();
+                attempts++; // count as a retry if time runs out
+                retryLabel.setText("Retries: " + attempts);
+                restartGame(); // reset the level
+                startTimer();  // restart the timer
+            }
+        });
+        countdownTimer.start();
+    }
+    
+    void showLevel2Intro(long prevTimeMillis, int prevAttempts, int prevScorePercent, Runnable afterIntro) {
+        JFrame introFrame = new JFrame();
+        introFrame.setSize(frameWidth, frameHeight);
+        introFrame.setUndecorated(true);
+        introFrame.setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel();
+        panel.setBackground(Color.BLACK);
+        panel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+
+        JTextArea textArea = new JTextArea();
+        textArea.setForeground(Color.GREEN);
+        textArea.setBackground(Color.BLACK);
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 20));
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setBorder(null);
+        panel.add(scrollPane, gbc);
+
+        JButton continueButton = new JButton("Continue");
+        continueButton.setFont(new Font("Monospaced", Font.BOLD, 18));
+        continueButton.setVisible(false);
+        gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weighty = 0;
+        panel.add(continueButton, gbc);
+
+        introFrame.add(panel);
+        introFrame.setVisible(true);
+
+        String introText = "LEVEL 2\n\n"
+                         + "Last run stats:\n"
+                         + "- Time taken: " + (prevTimeMillis/1000.0) + " seconds\n"
+                         + "- Number of attempts: " + prevAttempts + "\n"
+                         + "- Score: " + prevScorePercent + "%\n\n"
+                         + "Looks like someone’s ready for a tougher challenge... 😉\n"
+                         + "Prepare yourself!\n\n\n\n\n\n\n\n\n\n\n\n"
+                         + "Find the board.";
+
+        class TypeWriter {
+            private JTextArea textArea;
+            private Timer timer;
+            private String fullText;
+            private int index;
+
+            public TypeWriter(JTextArea textArea) {
+                this.textArea = textArea;
+            }
+
+            public void start(String text, Runnable onFinish) {
+                this.fullText = text;
+                this.index = 0;
+                textArea.setText(""); // clear previous
+                timer = new Timer(50, null);
+                timer.addActionListener(e -> {
+                    if (index < fullText.length()) {
+                        textArea.append("" + fullText.charAt(index));
+                        index++;
+                        textArea.setCaretPosition(textArea.getDocument().getLength()); // scroll down
+                    } else {
+                        timer.stop();
+                        if (onFinish != null) onFinish.run();
+                    }
+                });
+                timer.start();
+            }
+        }
+
+        TypeWriter typeWriter = new TypeWriter(textArea);
+
+        typeWriter.start(introText, () -> continueButton.setVisible(true));
+
+        continueButton.addActionListener(e -> {
+            introFrame.dispose();
+            afterIntro.run(); // start the actual level
+        });
+    }
+    
+    void showExitText(Runnable afterText) {
+        JFrame exitFrame = new JFrame();
+        exitFrame.setSize(frameWidth, frameHeight);
+        exitFrame.setUndecorated(true);
+        exitFrame.setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel();
+        panel.setBackground(Color.BLACK);
+        panel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+
+        JTextArea textArea = new JTextArea();
+        textArea.setForeground(Color.GREEN);
+        textArea.setBackground(Color.BLACK);
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 20));
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setBorder(null);
+        panel.add(scrollPane, gbc);
+
+        JButton continueButton = new JButton("Continue");
+        continueButton.setFont(new Font("Monospaced", Font.BOLD, 18));
+        continueButton.setVisible(false);
+        gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weighty = 0;
+        panel.add(continueButton, gbc);
+
+        exitFrame.add(panel);
+        exitFrame.setVisible(true);
+
+        String exitText = "CONGRATS, I GUESS...\n\n"
+                        + "See you soon 😉";
+
+        class TypeWriter {
+            private JTextArea textArea;
+            private Timer timer;
+            private String fullText;
+            private int index;
+
+            public TypeWriter(JTextArea textArea) {
+                this.textArea = textArea;
+            }
+
+            public void start(String text, Runnable onFinish) {
+                this.fullText = text;
+                this.index = 0;
+                textArea.setText(""); // clear previous
+                timer = new Timer(50, null);
+                timer.addActionListener(e -> {
+                    if (index < fullText.length()) {
+                        textArea.append("" + fullText.charAt(index));
+                        index++;
+                        textArea.setCaretPosition(textArea.getDocument().getLength()); // scroll down
+                    } else {
+                        timer.stop();
+                        if (onFinish != null) onFinish.run();
+                    }
+                });
+                timer.start();
+            }
+        }
+
+        TypeWriter typeWriter = new TypeWriter(textArea);
+        typeWriter.start(exitText, () -> continueButton.setVisible(true));
+
+        continueButton.addActionListener(e -> {
+            exitFrame.dispose();
+            afterText.run(); // close the game after the player clicks
+        });
     }
    
-    public void setFrame(){
-        frame.setLayout(new GraphPaperLayout(new Dimension(mapWidth,mapHeight)));
-       
-        int x=0, y=0, w=1, h=1;
-        for(int i=0;i<character.length;i++){
-            frame.add(character[i], new Rectangle(x,y,w,h));
+    public void setFrame() {
+        frame.setLayout(new GraphPaperLayout(new Dimension(mapWidth, mapHeight)));
+
+        // === HUD PANEL ===
+        JPanel hudPanel = new JPanel(null); // absolute positioning
+        hudPanel.setOpaque(false);
+        hudPanel.setBounds(0, 0, frameWidth, frameHeight);
+
+        retryLabel = new JLabel("Retries: " + attempts);
+        retryLabel.setForeground(Color.BLACK);
+        retryLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        retryLabel.setBounds(10, 10, 120, 25); // top-left
+        hudPanel.add(retryLabel);
+
+        timerLabel = new JLabel("Time: 2:00");
+        timerLabel.setForeground(Color.BLACK);
+        timerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        timerLabel.setBounds(frameWidth - 120, 10, 120, 25); // top-right
+        hudPanel.add(timerLabel);
+
+        // === ADD CHARACTERS ===
+        int x = 0, y = 0, w = 1, h = 1;
+        for (int i = 0; i < character.length; i++) {
+            frame.add(character[i], new Rectangle(x, y, w, h));
             x++;
-            if(x%mapWidth==0){
-                x=0;
+            if (x % mapWidth == 0) {
+                x = 0;
                 y++;
             }
         }
-        
-        x=0; y=0;
-        
-        for(int i=0;i<tiles.length;i++){
-            frame.add(tiles[i], new Rectangle(x,y,w,h));
+
+        // === ADD TILES ===
+        x = 0; y = 0;
+        for (int i = 0; i < tiles.length; i++) {
+            frame.add(tiles[i], new Rectangle(x, y, w, h));
             x++;
-            if(x%mapWidth==0){
-                x=0;
+            if (x % mapWidth == 0) {
+                x = 0;
                 y++;
             }
         }
-        frame.setSize(frameWidth,frameHeight);
-        frame.addKeyListener(this);
+
+        // === ADD HUD ON TOP ===
+        frame.getLayeredPane().add(hudPanel, JLayeredPane.PALETTE_LAYER);
+
+        frame.getLayeredPane().add(shieldLabel, JLayeredPane.DRAG_LAYER);
+        shieldLabel.setVisible(false); // hidden at start
+        // === FRAME SETTINGS ===
+        frame.setSize(frameWidth, frameHeight);
         frame.setFocusable(true);
+        frame.addKeyListener(this);
         frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);;
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        // === START TIMER ===
+        startTimer();
+    }
+    
+    
+    public void saveFastestTime(long timeMillis) {
+        try {
+            File file = new File("fastestTime2.txt"); // separate file for level 2
+            long bestTime = Long.MAX_VALUE;
+
+            if(file.exists()) {
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                String line = br.readLine();
+                if(line != null && !line.isEmpty()) bestTime = Long.parseLong(line);
+                br.close();
+            }
+
+            if(timeMillis < bestTime) {
+                BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+                bw.write(String.valueOf(timeMillis));
+                bw.close();
+                JOptionPane.showMessageDialog(frame, 
+                    "New record! Fastest time: " + timeMillis/1000.0 + " seconds.", 
+                    "Fastest Time", 
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } catch(IOException | NumberFormatException e) {
+            JOptionPane.showMessageDialog(frame, "Error saving fastest time.", "File Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void saveScore(int points) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("score.txt", true)); // append
+            bw.write("Level 2 score: " + points + "\n");
+            bw.close();
+        } catch(IOException e) {
+            JOptionPane.showMessageDialog(frame, "Error saving score.", "File Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     private void showFailScreen(int percentage){
@@ -412,9 +565,19 @@ public class PD7p2 implements KeyListener{
         if(correct){
             correctAnswers++;
             player.addPoints();
-            JOptionPane.showMessageDialog(frame, "Correct!");
+            JOptionPane.showMessageDialog(
+                frame,
+                "Correct! Your current score: " + player.getPoints(),
+                "Correct",
+                JOptionPane.INFORMATION_MESSAGE
+            );
         } else {
-            JOptionPane.showMessageDialog(frame, "Wrong! Try to remember this for next time.");
+            JOptionPane.showMessageDialog(
+                frame,
+                "Incorrect! Try another question.",
+                "Incorrect",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }
     
@@ -423,6 +586,51 @@ public class PD7p2 implements KeyListener{
         characterPosition = newPosition;
         player.setPosition(newPosition);
         character[newPosition].setIcon(playerIcon);
+        JLayeredPane layeredPane = frame.getLayeredPane();
+
+        if(currentDirection.equals("up")){
+            // put shield JUST BELOW player but ABOVE tiles
+            layeredPane.setLayer(shieldLabel, JLayeredPane.MODAL_LAYER);
+        } else {
+            // keep shield above player for other directions
+            layeredPane.setLayer(shieldLabel, JLayeredPane.DRAG_LAYER);
+        }
+
+        if(hasShield){
+            int baseX = (characterPosition % mapWidth) * tileSize;
+            int baseY = (characterPosition / mapWidth) * tileSize;
+
+            int offsetX = 0;
+            int offsetY = 0;
+
+            int shieldSize = tileSize / 2;
+
+            switch(currentDirection){
+                case "right":
+                    offsetX = tileSize - shieldSize - 5; // closer to player
+                    offsetY = tileSize / 4 - 15;
+                    break;
+                case "left":
+                    offsetX = (-shieldSize / 2) + 5; // slightly tucked in
+                    offsetY = tileSize / 4 - 15;
+                    break;
+                case "up":
+                    offsetX = tileSize / 4 + 15;
+                    offsetY = (-shieldSize / 2) + 28;
+                    break;
+                case "down":
+                    offsetX = tileSize / 4;
+                    offsetY = tileSize - shieldSize - 28; // pushed UP
+                    break;
+            }
+
+            shieldLabel.setBounds(
+                baseX + offsetX,
+                baseY + offsetY,
+                shieldSize,
+                shieldSize
+            );
+        }
     }
     
     public void handleInteraction(int tile) {
@@ -431,9 +639,9 @@ public class PD7p2 implements KeyListener{
                 if(!introShown){
                     JOptionPane.showMessageDialog(frame,
                         "OBJECTIVE:\n\n"
-                      + "1. Answer all 3 questions.\n"
+                      + "1. Answer all 3 questions. (Hint: It's all around the map)\n"
                       + "2. Get a perfect score.\n"
-                      + "3. Get the key.\n"
+                      + "3. Get the key. (Hint: vending machine)\n"
                       + "4. Reach the gate.");
                     introShown = true;
                 }
@@ -473,23 +681,54 @@ public class PD7p2 implements KeyListener{
                 int percentage = (correctAnswers * 100) / 3;
 
                 if(percentage >= 60){
-                    hasKey = true;
-                    JOptionPane.showMessageDialog(frame,
-                        "You passed with " + percentage + "%!\nYou obtained the key!");
+                    hasShield = true;
+
+                    // SHOW IMAGE + MESSAGE
+                    JLabel message = new JLabel("You obtained the SHIELD!", shieldIcon, JLabel.CENTER);
+                    message.setHorizontalTextPosition(JLabel.CENTER);
+                    message.setVerticalTextPosition(JLabel.BOTTOM);
+
+                    JOptionPane.showMessageDialog(
+                        frame,
+                        message,
+                        "Item Obtained",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+
+                    shieldLabel.setVisible(true); // show shield on map
+                    int baseX = (characterPosition % mapWidth) * tileSize;
+                    int baseY = (characterPosition / mapWidth) * tileSize;
+                    int shieldSize = tileSize / 2;
+
+                    moveCharacter(characterPosition);
+
                 } else {
                     showFailScreen(percentage);
                 }
                 break;
 
             case 7:
-                if(hasKey){
+                if(hasShield){
+                    countdownTimer.stop(); // stop the timer
+                    int finalScore = (correctAnswers * 100) / 3;
+                    long finishTime = System.currentTimeMillis() - startTime;
+
+                    // Show results first
                     JOptionPane.showMessageDialog(frame,
-                        "LEVEL COMPLETE!\nFinal Score: "
-                        + ((correctAnswers*100)/3) + "%");
-                    frame.dispose();
+                        "LEVEL COMPLETE!\nFinal Score: " + finalScore + "%"
+                        + "\nTime: " + (finishTime / 1000.0) + " seconds"
+                        + "\nRetries: " + attempts,
+                        "Level Complete",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                    saveFastestTime(finishTime);
+                    saveScore(correctAnswers); 
+
+                    // === SHOW EXIT TEXT ===
+                    showExitText(() -> System.exit(0)); // run System.exit(0) after text
                 } else {
                     JOptionPane.showMessageDialog(frame,
-                        "The gate is locked.\nGet the key first!");
+                        "The gate is locked.\nGet the shield first!");
                 }
                 break;
         }
@@ -497,18 +736,23 @@ public class PD7p2 implements KeyListener{
     
     private void restartGame(){
         correctAnswers = 0;
-        attempts = 0;
-        hasKey = false;
-        
+        // attempts stays the same -> do NOT reset attempts
+        hasShield = false;
+        shieldLabel.setVisible(false);
+
         q4Answered = false;
         q5Answered = false;
         q8Answered = false;
-        
+
         player.reset();
-        
+
         character[characterPosition].setIcon(null);
         characterPosition = startPosition;
         character[characterPosition].setIcon(playerIconfront);
+
+        // reset timer
+        timeLeft = 120;
+        timerLabel.setText("Time: 2:00");
     }
     
     @Override
@@ -522,21 +766,25 @@ public class PD7p2 implements KeyListener{
                 if (characterPosition % mapWidth != mapWidth - 1)
                     newPosition = characterPosition + 1;
                 playerIcon = playerIconright;
+                currentDirection = "right";
             }
             else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                 if (characterPosition % mapWidth != 0)
                     newPosition = characterPosition - 1;
                 playerIcon = playerIconleft;
+                currentDirection = "left";
             }
             else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
                 if (characterPosition + mapWidth < mapWidth * mapHeight)
                     newPosition = characterPosition + mapWidth;
                 playerIcon = playerIconfront;
+                currentDirection = "down";
             }
             else if (e.getKeyCode() == KeyEvent.VK_UP) {
                 if (characterPosition - mapWidth >= 0)
                     newPosition = characterPosition - mapWidth;
                 playerIcon = playerIconback;
+                currentDirection = "up";
             }
             else {
                 throw new IllegalArgumentException("Invalid key");
@@ -546,6 +794,12 @@ public class PD7p2 implements KeyListener{
             int tile = characterPlace[newPosition];
             if (tile == 1)
                 return;
+            // Block tile 6 unless coming from tile 2
+            if (tile == 6 && characterPlace[characterPosition] != 2) {
+                return; // treat as wall
+            }
+
+            // Still check if questions are answered
             if (tile == 6 && attempts < 3) {
                 JOptionPane.showMessageDialog(frame,
                     "Answer all 3 questions first!");
@@ -577,9 +831,4 @@ public class PD7p2 implements KeyListener{
     
     @Override
     public void keyReleased(KeyEvent e) {}
-    public static void main(String[] args) {
-            PD7p2 game = new PD7p2();
-            game.setFrame();
-        }
-
 }
