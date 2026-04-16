@@ -75,6 +75,7 @@ public class PD7p2 implements KeyListener{
     int prevScorePercent;
     int score; 
     int timeLeft = 120; // 2 minutes
+    int retries = 0;
     private int startPosition;
     private PlayerCharacter player;
     boolean q4Answered = false;
@@ -107,7 +108,7 @@ public class PD7p2 implements KeyListener{
     public void setScore(int score) { this.score = score; }
     public PD7p2(long finishTime, int prevAttempts, int prevScorePercent){
         this.finishTime = finishTime;
-        this.attempts = prevAttempts;
+        this.attempts = 0;
         this.score = prevScorePercent;
         frame=new JFrame();
         startTime = System.currentTimeMillis();
@@ -178,8 +179,8 @@ public class PD7p2 implements KeyListener{
 
             if(timeLeft <= 0){
                 countdownTimer.stop();
-                attempts++; // count as a retry if time runs out
-                retryLabel.setText("Retries: " + attempts);
+                retries++;
+                retryLabel.setText("Retries: " + retries);
                 restartGame(); // reset the level
                 startTimer();  // restart the timer
             }
@@ -364,7 +365,7 @@ public class PD7p2 implements KeyListener{
         hudPanel.setOpaque(false);
         hudPanel.setBounds(0, 0, frameWidth, frameHeight);
 
-        retryLabel = new JLabel("Retries: " + attempts);
+        retryLabel = new JLabel("Retries: " + retries);
         retryLabel.setForeground(Color.BLACK);
         retryLabel.setFont(new Font("Arial", Font.BOLD, 16));
         retryLabel.setBounds(10, 10, 120, 25); // top-left
@@ -405,9 +406,10 @@ public class PD7p2 implements KeyListener{
         shieldLabel.setVisible(false); // hidden at start
         // === FRAME SETTINGS ===
         frame.setSize(frameWidth, frameHeight);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true); 
         frame.setFocusable(true);
         frame.addKeyListener(this);
-        frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // === START TIMER ===
@@ -465,6 +467,8 @@ public class PD7p2 implements KeyListener{
         );
         
         if(choice == 0){
+            retries++;
+            retryLabel.setText("Retries: " + retries);
             restartGame();
         } else {
             System.exit(0);
@@ -672,7 +676,7 @@ public class PD7p2 implements KeyListener{
                 break;
 
             case 6:
-                if(attempts < 3){
+                if(!(q4Answered && q5Answered && q8Answered)){
                     JOptionPane.showMessageDialog(frame,
                         "Answer all 3 questions first!");
                     return;
@@ -680,10 +684,9 @@ public class PD7p2 implements KeyListener{
 
                 int percentage = (correctAnswers * 100) / 3;
 
-                if(percentage >= 60){
+                if(percentage == 100){
                     hasShield = true;
 
-                    // SHOW IMAGE + MESSAGE
                     JLabel message = new JLabel("You obtained the SHIELD!", shieldIcon, JLabel.CENTER);
                     message.setHorizontalTextPosition(JLabel.CENTER);
                     message.setVerticalTextPosition(JLabel.BOTTOM);
@@ -695,15 +698,11 @@ public class PD7p2 implements KeyListener{
                         JOptionPane.INFORMATION_MESSAGE
                     );
 
-                    shieldLabel.setVisible(true); // show shield on map
-                    int baseX = (characterPosition % mapWidth) * tileSize;
-                    int baseY = (characterPosition / mapWidth) * tileSize;
-                    int shieldSize = tileSize / 2;
-
+                    shieldLabel.setVisible(true);
                     moveCharacter(characterPosition);
 
                 } else {
-                    showFailScreen(percentage);
+                    showFailScreen(percentage); // ✅ this now triggers properly
                 }
                 break;
 
@@ -717,7 +716,7 @@ public class PD7p2 implements KeyListener{
                     JOptionPane.showMessageDialog(frame,
                         "LEVEL COMPLETE!\nFinal Score: " + finalScore + "%"
                         + "\nTime: " + (finishTime / 1000.0) + " seconds"
-                        + "\nRetries: " + attempts,
+                        + "\nRetries: " + retries,
                         "Level Complete",
                         JOptionPane.INFORMATION_MESSAGE);
 
@@ -753,6 +752,8 @@ public class PD7p2 implements KeyListener{
         // reset timer
         timeLeft = 120;
         timerLabel.setText("Time: 2:00");
+        
+        retryLabel.setText("Retries: " + retries);
     }
     
     @Override
@@ -794,24 +795,20 @@ public class PD7p2 implements KeyListener{
             int tile = characterPlace[newPosition];
             if (tile == 1)
                 return;
-            // Block tile 6 unless coming from tile 2
-            if (tile == 6 && characterPlace[characterPosition] != 2) {
-                return; // treat as wall
-            }
-
-            // Still check if questions are answered
-            if (tile == 6 && attempts < 3) {
-                JOptionPane.showMessageDialog(frame,
-                    "Answer all 3 questions first!");
+            if (tile == 6) {
+                // only allow interaction if coming from tile 2
+                if (characterPlace[characterPosition] != 2) {
+                    return; // block completely
+                }
+                handleInteraction(tile);
                 return;
             }
-            if (newPosition != characterPosition) {
-                if (tile >= 3 && tile <= 8) {
-                    handleInteraction(tile);
-                } else {
-                    moveCharacter(newPosition);
-                }
+            if (tile >= 3 && tile <= 8) {
+                handleInteraction(tile);
+                return;
             }
+            moveCharacter(newPosition);
+            
         } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(
                 frame,
