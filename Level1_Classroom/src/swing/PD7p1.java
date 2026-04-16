@@ -301,7 +301,9 @@ public class PD7p1 implements KeyListener{
         }
         frame.add(hudPanel); // add it **after** tiles and characters
         
-        frame.setSize(frameWidth,frameHeight);
+        frame.setSize(frameWidth, frameHeight);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true); 
         retryLabel.setForeground(Color.BLACK);
         retryLabel.setFont(new Font("Arial", Font.BOLD, 14));
         retryLabel.setBounds(10, 10, 100, 20); // top-left
@@ -332,7 +334,6 @@ public class PD7p1 implements KeyListener{
         JLayeredPane layeredPane = frame.getLayeredPane();
         hudPanel.setBounds(0, 0, frameWidth, frameHeight);
         layeredPane.add(hudPanel, JLayeredPane.PALETTE_LAYER); // top layer
-        frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setResizable(false);
         startTime = System.currentTimeMillis();
