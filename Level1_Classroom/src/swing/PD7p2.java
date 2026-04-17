@@ -231,7 +231,7 @@ public class PD7p2 implements KeyListener{
         String introText = "LEVEL 2\n\n"
                          + "Last run stats:\n"
                          + "- Time taken: " + (prevTimeMillis/1000.0) + " seconds\n"
-                         + "- Number of attempts: " + prevAttempts + "\n"
+                         + "- Number of retries: " + prevAttempts + "\n"
                          + "- Score: " + prevScorePercent + "%\n\n"
                          + "Looks like someone’s ready for a tougher challenge... 😉\n"
                          + "Prepare yourself!\n\n\n\n\n\n\n\n\n\n\n\n"
