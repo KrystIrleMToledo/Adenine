@@ -601,8 +601,8 @@ public class PD7p1 implements KeyListener{
                 saveFastestTime(finishTime);
                 saveScore(correctAnswers); // saves the score to score.txt
                 frame.dispose();
-                PD7p2 level2 = new PD7p2(finishTime, attempts, correctAnswers*100/5);
-                level2.showLevel2Intro(finishTime, attempts, correctAnswers*100/5, () -> {
+                PD7p2 level2 = new PD7p2(finishTime, retries, correctAnswers*100/5);
+                level2.showLevel2Intro(finishTime, retries, correctAnswers*100/5, () -> {
                     level2.setFrame(); // start level 2 after intro
                 });
             } else {
