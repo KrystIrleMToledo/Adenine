@@ -13,9 +13,9 @@ import java.util.List;
 /* Submitted by: Ralph Jabez Abonado, Ayessa Faye S. Sadian, and Althea Robee V. Cajara */
 /* 10-Adenine */
 
-// 1. Change "public class Q2PD4" to "extends JPanel"
+
 public class Q2PD4 extends JPanel {
-    // 2. Add the reference to the PD8 window 
+   
     private PD8 window;
     
     private final int TILE_SIZE = 32;
@@ -69,10 +69,9 @@ public class Q2PD4 extends JPanel {
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1} 
     };
 
-    // 3. Update Constructor to accept (PD8 window)
     public Q2PD4(PD8 window) {
         this.window = window;
-        this.setLayout(new BorderLayout()); // Set layout for the panel
+        this.setLayout(new BorderLayout()); 
         
         tileMap = new JLabel[mapHeight][mapWidth];
         currentMapConfig = copyMap(initialMapConfig);
@@ -82,7 +81,7 @@ public class Q2PD4 extends JPanel {
         
         loadAssets();
         
-        // Build the grid inside this panel instead of a separate frame
+       
         JPanel p = new JPanel(new GridLayout(mapHeight, mapWidth));
         initializeMapDisplay(p);
         
@@ -92,7 +91,7 @@ public class Q2PD4 extends JPanel {
         startTimer();
         setupLuckTimer();
 
-        // Key listeners now attach to "this" panel
+
         this.setFocusable(true);
         this.addKeyListener(new KeyAdapter() {
             @Override
@@ -102,7 +101,7 @@ public class Q2PD4 extends JPanel {
         });
     }
 
-    // 4. Added this method so the PD8 controller can access the panel 
+
     public JPanel getMainPanel() {
         return this;
     }
@@ -216,7 +215,6 @@ public class Q2PD4 extends JPanel {
         if (nx >= 0 && nx < mapWidth && ny >= 0 && ny < mapHeight) {
             int targetId = currentMapConfig[ny][nx];
 
-            // Trigger Map Change [cite: 96-103, 107]
             if (nx == 9 && ny == 11 && totalReported >= TOTAL_GOAL) {
                 tileMap[playerY][playerX].setIcon(getIconForId(currentMapConfig[playerY][playerX]));
                 playerX = nx; playerY = ny;
