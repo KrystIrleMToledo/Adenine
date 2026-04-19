@@ -24,6 +24,8 @@ public class PD7p1 implements KeyListener{
     ImageIcon playerIconback2;
     ImageIcon playerIconleft;
     ImageIcon playerIconright;
+    ImageIcon playerIconright2;
+    ImageIcon playerIconleft2;
     JLabel tiles[];
     JLabel character[];
     int mapLayout[];
@@ -51,14 +53,33 @@ public class PD7p1 implements KeyListener{
     boolean historylock = false;
     boolean trivialock = false;
     boolean trivia2lock = false;
+    double playerScale = 0.8;
     long startTime;
     private int timeLeft = 120;  // seconds
     private int retries = 0;
     private Timer countdownTimer;
     private JLabel retryLabel;     // To show retries at top-left
     private JLabel timerLabel;     // To show countdown at top-right
-   
+    boolean isMoving = false;
+    int animFrame = 0;
+    String playerType = "boy"; // default
+    String currentDirection = "down";
+    
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
     public PD7p1(){
+        loadPlayerType();
         frame=new JFrame();
         characterPosition=-1;
        
@@ -73,13 +94,107 @@ public class PD7p1 implements KeyListener{
         s4 = new ImageIcon(new ImageIcon("Images/5.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
         board = new ImageIcon(new ImageIcon("Images/6.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
         s5 = new ImageIcon(new ImageIcon("Images/7.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconfront = playerIcon = new ImageIcon(new ImageIcon("Images/14.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconfront2 = new ImageIcon(new ImageIcon("Images/8.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconback  = new ImageIcon(new ImageIcon("Images/11.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconback2 = new ImageIcon(new ImageIcon("Images/12.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconright = new ImageIcon(new ImageIcon("Images/13.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconleft = new ImageIcon(new ImageIcon("Images/9.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-       
+        int playerSize = (int)(tileSize * playerScale);
+
+        if (playerType.equals("girl")) {
+                playerIconfront = playerIcon = new ImageIcon(
+                    new ImageIcon("Images/gplayer1.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconfront2 = new ImageIcon(
+                    new ImageIcon("Images/gplayer2.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconback = new ImageIcon(
+                    new ImageIcon("Images/gplayer3.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconback2 = new ImageIcon(
+                    new ImageIcon("Images/gplayer9.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconright = new ImageIcon(
+                    new ImageIcon("Images/gplayer5.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconleft = new ImageIcon(
+                    new ImageIcon("Images/gplayer6.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconright2 = new ImageIcon(
+                    new ImageIcon("Images/gplayer7.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconleft2 = new ImageIcon(
+                    new ImageIcon("Images/gplayer8.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+            } else {
+                // default BOY sprites (your current ones)
+                playerIconfront = playerIcon = new ImageIcon(
+                    new ImageIcon("Images/player1.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconfront2 = new ImageIcon(
+                    new ImageIcon("Images/player2.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconback = new ImageIcon(
+                    new ImageIcon("Images/player3.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconback2 = new ImageIcon(
+                    new ImageIcon("Images/player9.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconright = new ImageIcon(
+                    new ImageIcon("Images/player5.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconleft = new ImageIcon(
+                    new ImageIcon("Images/player6.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconright2 = new ImageIcon(
+                    new ImageIcon("Images/player7.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+
+                playerIconleft2 = new ImageIcon(
+                    new ImageIcon("Images/player8.png")
+                    .getImage()
+                    .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+                );
+            }
         character=new JLabel[mapWidth*mapHeight];
         characterPlace=new int[]{
             0,0,0,0,0,0,0,0,0,0,1,0,
@@ -340,9 +455,33 @@ public class PD7p1 implements KeyListener{
         
         frame.addKeyListener(this);
     }
+    private void toggleAnimation() {
+        animFrame = 1 - animFrame;
+
+        switch(currentDirection) {
+            case "down":
+                playerIcon = (animFrame == 0) ? playerIconfront : playerIconfront2;
+                break;
+
+            case "up":
+                playerIcon = (animFrame == 0) ? playerIconback : playerIconback2;
+                break;
+
+            case "right":
+                playerIcon = (animFrame == 0) ? playerIconright : playerIconright2;
+                break;
+
+            case "left":
+                playerIcon = (animFrame == 0) ? playerIconleft : playerIconleft2;
+                break;
+        }
+
+        character[characterPosition].setIcon(playerIcon);
+    }
 
     public void resetLevel() {
-        character[characterPosition].setIcon(null);
+        if (characterPosition >= 0)
+            character[characterPosition].setIcon(null);
         for (int i = 0; i < characterPlace.length; i++) {
             if (characterPlace[i] == 1) {
                 characterPosition = i;
@@ -359,6 +498,7 @@ public class PD7p1 implements KeyListener{
         historylock = false;
         trivialock = false;
         trivia2lock = false;
+        timeLeft = 120;
     }
 
     public boolean askMathQuestion() {
@@ -451,12 +591,12 @@ public class PD7p1 implements KeyListener{
         if (n == 0) {
             answer = JOptionPane.showInputDialog(
                 frame,
-                "What was Java originally called in 1991?",
+                "How many years was the Philippines owned by Spain?",
                 "Trivia Question",
                 JOptionPane.QUESTION_MESSAGE
             );
             if (answer == null) return false;
-            return answer.equalsIgnoreCase("Oak");
+            return answer.equalsIgnoreCase("333");
         } 
         else {
             answer = JOptionPane.showInputDialog(
@@ -513,12 +653,12 @@ public class PD7p1 implements KeyListener{
         else {
             answer = JOptionPane.showInputDialog(
                 frame,
-                "If a substance receives the hydrogen ion, it is the?",
+                "What is the third side of a triangle called?",
                 "Trivia Question",
                 JOptionPane.QUESTION_MESSAGE
             );
             if (answer == null) return false;
-            return answer.equalsIgnoreCase("Base");
+            return answer.equalsIgnoreCase("Hypotenuse");
         }
     }
     
@@ -650,7 +790,7 @@ public class PD7p1 implements KeyListener{
     public void saveScore(int points) {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter("score.txt", true)); // append mode
-            bw.write("Level 1 score: " + points + "\n");
+            bw.write(points + "\n");
             bw.close();
         } catch(IOException e) {
             JOptionPane.showMessageDialog(frame, "Error saving score.", "File Error", JOptionPane.ERROR_MESSAGE);
@@ -667,32 +807,33 @@ public class PD7p1 implements KeyListener{
         try {
             int newPosition = characterPosition;
             if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                if (characterPosition % mapWidth != mapWidth - 1) {
+                if (characterPosition % mapWidth != mapWidth - 1)
                     newPosition = characterPosition + 1;
-                    playerIcon = playerIconright;
-                }
+                currentDirection = "right";
+                toggleAnimation();
             }
             else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-                if (characterPosition % mapWidth != 0) {
+                if (characterPosition % mapWidth != 0)
                     newPosition = characterPosition - 1;
-                    playerIcon = playerIconleft;
-                }
+                currentDirection = "left";
+                toggleAnimation();
             }
             else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                if (characterPosition + mapWidth < mapWidth * mapHeight) {
+                if (characterPosition + mapWidth < mapWidth * mapHeight)
                     newPosition = characterPosition + mapWidth;
-                    playerIcon = playerIconfront;
-                }
+                currentDirection = "down";
+                toggleAnimation();
             }
             else if (e.getKeyCode() == KeyEvent.VK_UP) {
-                if (characterPosition - mapWidth >= 0) {
+                if (characterPosition - mapWidth >= 0)
                     newPosition = characterPosition - mapWidth;
-                    playerIcon = playerIconback;
-                }
+                currentDirection = "up";
+                toggleAnimation();
             }
             else {
                 throw new IllegalArgumentException("Invalid key");
             }
+            if (newPosition == characterPosition) return;
             if (mapLayout[newPosition] == 6 || mapLayout[newPosition] == 2 
                     || (mapLayout[newPosition] == 5 && mathlock) 
                     || (mapLayout[newPosition] == 3 && sciencelock) 
