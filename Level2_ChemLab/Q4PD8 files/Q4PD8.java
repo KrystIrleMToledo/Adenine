@@ -51,7 +51,6 @@ public class Q4PD8 extends JPanel {
 
     private ArrayList<LoggedItem> collectionLog = new ArrayList<>();
 
-    // UPDATED CONSTRUCTOR: Now accepts the window bridge
     public Q4PD8(PD8 window) {
         this.window = window;
         loadAssets();
@@ -117,7 +116,7 @@ public class Q4PD8 extends JPanel {
         if (secondsTaken < bestTimeEver) {
             try (PrintWriter writer = new PrintWriter(new FileWriter(file, true))) {
                 writer.println(RECORD_KEY + secondsTaken + " | Achieved: " + new java.util.Date());
-                writer.flush(); // Ensure data is pushed to the file
+                writer.flush(); 
                 displayMessage("NEW PERSONAL BEST! " + secondsTaken + "s.");
             } catch (IOException e) {
                 displayMessage("Log error: " + e.getMessage());
