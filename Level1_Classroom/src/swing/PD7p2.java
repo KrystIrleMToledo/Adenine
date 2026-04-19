@@ -45,6 +45,8 @@ public class PD7p2 implements KeyListener{
     ImageIcon playerIconback2;
     ImageIcon playerIconleft;
     ImageIcon playerIconright;
+    ImageIcon playerIconright2;
+    ImageIcon playerIconleft2;
     ImageIcon shieldIcon;
     JLabel tiles[];
     JLabel character[];
@@ -76,6 +78,7 @@ public class PD7p2 implements KeyListener{
     int score; 
     int timeLeft = 120; // 2 minutes
     int retries = 0;
+    double playerScale = 0.8;
     private int startPosition;
     private PlayerCharacter player;
     boolean q4Answered = false;
@@ -87,8 +90,9 @@ public class PD7p2 implements KeyListener{
     Timer countdownTimer;
     long finishTime;     // For storing the finish time
     long prevTime;
-    
-    
+    boolean isMoving = false;
+    int animFrame = 0;
+    String playerType = "boy"; // default
     String currentDirection = "down";
     /*OBJECTIVE
             Move the character using the arrow keys.
@@ -106,7 +110,21 @@ public class PD7p2 implements KeyListener{
     public void setFinishTime(long finishTime) { this.finishTime = finishTime; }
     public void setAttempts(int attempts) { this.attempts = attempts; }
     public void setScore(int score) { this.score = score; }
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
     public PD7p2(long finishTime, int prevAttempts, int prevScorePercent){
+        loadPlayerType();
         this.finishTime = finishTime;
         this.attempts = 0;
         this.score = prevScorePercent;
@@ -125,12 +143,108 @@ public class PD7p2 implements KeyListener{
                 new ImageIcon(filePath).getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
             );
         }
-        playerIconfront = playerIcon = new ImageIcon(new ImageIcon("Images/player1.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconfront2 = new ImageIcon(new ImageIcon("Images/player2.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconback  = new ImageIcon(new ImageIcon("Images/player3.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconback2 = new ImageIcon(new ImageIcon("Images/player4.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconright = new ImageIcon(new ImageIcon("Images/player5.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconleft  = new ImageIcon(new ImageIcon("Images/player6.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
+        int playerSize = (int)(tileSize * playerScale);
+
+        if (playerType.equals("girl")) {
+
+            playerIconfront = playerIcon = new ImageIcon(
+                new ImageIcon("Images/gplayer1.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconfront2 = new ImageIcon(
+                new ImageIcon("Images/gplayer2.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback = new ImageIcon(
+                new ImageIcon("Images/gplayer3.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback2 = new ImageIcon(
+                new ImageIcon("Images/gplayer9.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright = new ImageIcon(
+                new ImageIcon("Images/gplayer5.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft = new ImageIcon(
+                new ImageIcon("Images/gplayer6.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright2 = new ImageIcon(
+                new ImageIcon("Images/gplayer7.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft2 = new ImageIcon(
+                new ImageIcon("Images/gplayer8.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+        } else {
+            // default BOY sprites (your current ones)
+            playerIconfront = playerIcon = new ImageIcon(
+                new ImageIcon("Images/player1.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconfront2 = new ImageIcon(
+                new ImageIcon("Images/player2.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback = new ImageIcon(
+                new ImageIcon("Images/player3.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback2 = new ImageIcon(
+                new ImageIcon("Images/player9.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright = new ImageIcon(
+                new ImageIcon("Images/player5.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft = new ImageIcon(
+                new ImageIcon("Images/player6.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright2 = new ImageIcon(
+                new ImageIcon("Images/player7.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft2 = new ImageIcon(
+                new ImageIcon("Images/player8.png")
+                .getImage()
+                .getScaledInstance(playerSize, playerSize, Image.SCALE_SMOOTH)
+            );
+        }
         character=new JLabel[mapWidth*mapHeight];
         int shieldSize = tileSize / 2;
         shieldIcon = new ImageIcon(new ImageIcon("Images/shield.png").getImage().getScaledInstance(shieldSize, shieldSize, Image.SCALE_SMOOTH));
@@ -169,6 +283,7 @@ public class PD7p2 implements KeyListener{
             countdownTimer.stop();
 
         timeLeft = 120; // reset time each restart
+        if(timerLabel == null || retryLabel == null) return;
         timerLabel.setText("Time: 2:00");
 
         countdownTimer = new Timer(1000, e -> {
@@ -231,7 +346,7 @@ public class PD7p2 implements KeyListener{
         String introText = "LEVEL 2\n\n"
                          + "Last run stats:\n"
                          + "- Time taken: " + (prevTimeMillis/1000.0) + " seconds\n"
-                         + "- Number of retries: " + prevAttempts + "\n"
+                         + "- Retries: " + prevAttempts + "\n"
                          + "- Score: " + prevScorePercent + "%\n\n"
                          + "Looks like someone’s ready for a tougher challenge... 😉\n"
                          + "Prepare yourself!\n\n\n\n\n\n\n\n\n\n\n\n"
@@ -415,7 +530,29 @@ public class PD7p2 implements KeyListener{
         // === START TIMER ===
         startTimer();
     }
-    
+    private void toggleAnimation() {
+        animFrame = 1 - animFrame;
+
+        switch(currentDirection) {
+            case "down":
+                playerIcon = (animFrame == 0) ? playerIconfront : playerIconfront2;
+                break;
+
+            case "up":
+                playerIcon = (animFrame == 0) ? playerIconback : playerIconback2;
+                break;
+
+            case "right":
+                playerIcon = (animFrame == 0) ? playerIconright : playerIconright2;
+                break;
+
+            case "left":
+                playerIcon = (animFrame == 0) ? playerIconleft : playerIconleft2;
+                break;
+        }
+
+        character[characterPosition].setIcon(playerIcon);
+    }
     
     public void saveFastestTime(long timeMillis) {
         try {
@@ -747,7 +884,8 @@ public class PD7p2 implements KeyListener{
 
         character[characterPosition].setIcon(null);
         characterPosition = startPosition;
-        character[characterPosition].setIcon(playerIconfront);
+        playerIcon = playerIconfront;
+        character[characterPosition].setIcon(playerIcon);
 
         // reset timer
         timeLeft = 120;
@@ -766,26 +904,26 @@ public class PD7p2 implements KeyListener{
             if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
                 if (characterPosition % mapWidth != mapWidth - 1)
                     newPosition = characterPosition + 1;
-                playerIcon = playerIconright;
                 currentDirection = "right";
+                toggleAnimation();
             }
             else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                 if (characterPosition % mapWidth != 0)
                     newPosition = characterPosition - 1;
-                playerIcon = playerIconleft;
                 currentDirection = "left";
+                toggleAnimation();
             }
             else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
                 if (characterPosition + mapWidth < mapWidth * mapHeight)
                     newPosition = characterPosition + mapWidth;
-                playerIcon = playerIconfront;
                 currentDirection = "down";
+                toggleAnimation();
             }
             else if (e.getKeyCode() == KeyEvent.VK_UP) {
                 if (characterPosition - mapWidth >= 0)
                     newPosition = characterPosition - mapWidth;
-                playerIcon = playerIconback;
                 currentDirection = "up";
+                toggleAnimation();
             }
             else {
                 throw new IllegalArgumentException("Invalid key");
