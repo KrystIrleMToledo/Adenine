@@ -36,7 +36,7 @@ public class Q4PD8 extends JPanel {
     private HashMap<String, ArrayList<ImageIcon>> shelfInventories;
 
     private final String TIME_FILE = "fastest_time.txt";
-    private final String RECORD_KEY = "RECORD_SECONDS: ";
+    private final String RECORD_KEY = "TIME RECORD (map 2): ";
 
     private class LoggedItem {
         private ImageIcon icon;
@@ -50,6 +50,7 @@ public class Q4PD8 extends JPanel {
     }
 
     private ArrayList<LoggedItem> collectionLog = new ArrayList<>();
+
 
     public Q4PD8(PD8 window) {
         this.window = window;
@@ -188,8 +189,10 @@ public class Q4PD8 extends JPanel {
                         box.dispose();
                         checkAndSaveFastestTime(timeSpent);
                     }else{
-                        displayMessage("Staff: Thank you for reporting this faulty glassware!");
+                        displayMessage("Staff: This one's good.");
                     }
+                }else{
+                    displayMessage("Staff: Thank you for reporting this faulty glassware!");
                 }
                 repaint();
             });
