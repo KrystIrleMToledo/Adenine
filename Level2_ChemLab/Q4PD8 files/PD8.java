@@ -5,7 +5,7 @@ import javax.swing.*;
 public class PD8 extends JFrame {
     
     public PD8() {
-        setTitle("LEVEL 2: Catalyst");
+        setTitle("LEVEL 2: Volatile Panic");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         showMap1(); 
     }
