@@ -116,7 +116,7 @@ public class Q4PD8 extends JPanel {
 
         if (secondsTaken < bestTimeEver) {
             try (PrintWriter writer = new PrintWriter(new FileWriter(file, true))) {
-                writer.println(RECORD_KEY + secondsTaken + " | Achieved: " + new java.util.Date());
+                writer.println("\n" + RECORD_KEY + secondsTaken + " | Achieved: " + new java.util.Date());
                 writer.flush(); 
                 displayMessage("NEW PERSONAL BEST! " + secondsTaken + "s.");
             } catch (IOException e) {
