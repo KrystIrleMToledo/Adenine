@@ -301,6 +301,7 @@ public class cs4backroom implements KeyListener {
             int confirm = JOptionPane.showConfirmDialog(frame,
                 "Lock this item in? Are you sure?", "Confirm", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
+                //game ends here, when the item put in the chest is a pendulum and they lock the item in. ending
                 if (itemInChest == PENDULUM) {
                     chestClosed  = true;
                     gameFinished = true;
