@@ -32,13 +32,26 @@ public class battleMockUp implements KeyListener{
   
     ImageIcon defaultSwordAnim4;
 
+    ImageIcon defaultPunchAnim1;
+    
+    ImageIcon defaultPunchAnim2;
+    
+    ImageIcon defaultMouthAnim1;
+    
+    ImageIcon defaultMouthAnim2;
+    
+    ImageIcon defaultShieldAnim1;
+    
+    ImageIcon alarm;
+
     int iconMode;
+    int animMode = 0;
     
     boolean swordActive = false;
+    boolean attackOnCooldown = false;
+    boolean takeDMG = false;
     
     long swordStartTime = 0;
-        
-   
     
     JLabel dynamicMap[];
     int startingMap[];
@@ -59,17 +72,24 @@ public class battleMockUp implements KeyListener{
     int swordFrame = 0;
     int ph = 200;
     int oh = 1000;
+    int round = 0;
     
     long end;
     float time;
+    
     boolean hasParried = false;
+    boolean hasFailedParry = false;
     boolean hasTakenDamage = false;
+    boolean parryWindowActive = false;
     
     private boolean battleFinished = false;
     private boolean playerWon = false;
 
-
-
+    JProgressBar playerHPBar;
+    JProgressBar enemyHPBar;
+    
+    JPanel movePanel;
+    JLabel battleMessage;
     
     public battleMockUp(){
         frame = new JFrame("how are you po sir?");
@@ -108,7 +128,33 @@ public class battleMockUp implements KeyListener{
         
         defaultSwordAnim4 = new ImageIcon(defaultSwordAnim4.getImage().getScaledInstance((frameWidth/mapWidth) * 2, (frameHeight/mapHeight) * 2, Image.SCALE_DEFAULT));
         
+        alarm = new ImageIcon("Images/alarm.png");
         
+        defaultPunchAnim1 = new ImageIcon("Images/openf.png");
+        
+        defaultPunchAnim2 = new ImageIcon("Images/closef.png");
+        
+        defaultMouthAnim1 = new ImageIcon("Images/mouthopen.png");
+        
+        defaultMouthAnim2 = new ImageIcon("Images/mouthclose.png");
+        
+        defaultShieldAnim1 = new ImageIcon("Images/shieldsuccess.png");
+        
+        defaultPlayer = new ImageIcon(defaultPlayer.getImage().getScaledInstance((frameWidth / mapWidth) * 3,(frameHeight / mapHeight) * 3, Image.SCALE_DEFAULT));
+        
+        defaultOpp = new ImageIcon(defaultOpp.getImage().getScaledInstance((frameWidth / mapWidth) * 3,(frameHeight / mapHeight) * 3, Image.SCALE_DEFAULT));
+        
+        defaultPunchAnim1 = new ImageIcon(defaultPunchAnim1.getImage().getScaledInstance((frameWidth/mapWidth) * 2, (frameHeight/mapHeight) * 2, Image.SCALE_DEFAULT));
+        
+        defaultPunchAnim2 = new ImageIcon(defaultPunchAnim2.getImage().getScaledInstance((frameWidth/mapWidth) * 2, (frameHeight/mapHeight) * 2, Image.SCALE_DEFAULT));
+        
+        defaultMouthAnim1 = new ImageIcon(defaultMouthAnim1.getImage().getScaledInstance((frameWidth/mapWidth) * 2, (frameHeight/mapHeight) * 2, Image.SCALE_DEFAULT));
+        
+        defaultMouthAnim2 = new ImageIcon(defaultMouthAnim2.getImage().getScaledInstance((frameWidth/mapWidth) * 2, (frameHeight/mapHeight) * 2, Image.SCALE_DEFAULT));
+        
+        defaultShieldAnim1 = new ImageIcon(defaultShieldAnim1.getImage().getScaledInstance((frameWidth/mapWidth) * 2, (frameHeight/mapHeight) * 2, Image.SCALE_DEFAULT));
+        
+        alarm = new ImageIcon(alarm.getImage().getScaledInstance((frameWidth/mapWidth) * 2, (frameHeight/mapHeight) * 2, Image.SCALE_DEFAULT));
 
 
 
@@ -121,16 +167,21 @@ public class battleMockUp implements KeyListener{
             end = System.currentTimeMillis();
             time = (end - beginning) / 1000f;
             if (elapsed >= 2000) {
+                parryWindowActive = false;
                 swordLabel.setVisible(false);
                 swordActive = false;
+                attackOnCooldown = false;
+                takeDMG = false;
+
                 swordTimer.stop();
 
-                // Enemy still alive → enemy attacks
                 if (oh > 0 && !hasParried && !hasTakenDamage) {
                     takeDamage();
                 }
 
-                // Enemy died → NOW end the battle
+                hasFailedParry = false;
+                hasParried = false;
+
                 if (oh == 0) {
                     JOptionPane.showMessageDialog(frame, "Hacker.", "Win", JOptionPane.INFORMATION_MESSAGE);
                     playerWon = true;
@@ -138,21 +189,34 @@ public class battleMockUp implements KeyListener{
                     frame.dispose();
                 }
             } else if (elapsed >= 1800) {
-                swordLabel.setIcon(defaultSwordAnim4);
+                if (hasParried) {
+                    swordLabel.setIcon(defaultShieldAnim1);
+                }
+                else if (!takeDMG) {
+                    swordLabel.setIcon(defaultMouthAnim2);
+                }
+
             } else if (elapsed >= 1440) {
-                swordLabel.setIcon(defaultSwordAnim3);
-                swordLabel.setVisible(true);
+                if(!takeDMG) {
+                    swordLabel.setIcon(defaultMouthAnim1);
+                }
             } else if (elapsed >= 480) {
-                swordLabel.setVisible(false);
+                swordLabel.setIcon(alarm);
             } else if (elapsed >= 240) {
-                swordLabel.setIcon(defaultSwordAnim2);
+                if (animMode == 1) {
+                    swordLabel.setIcon(defaultPunchAnim2);
+                } else if (animMode == 2) {
+                    swordLabel.setIcon(defaultSwordAnim2);
+                }
             } else {
-                swordLabel.setIcon(defaultSwordAnim1);
+                if (animMode == 1) {
+                    swordLabel.setIcon(defaultPunchAnim1);
+                } else if (animMode == 2) {
+                    swordLabel.setIcon(defaultSwordAnim1);
+                }
                 swordLabel.setVisible(true);
             }
         });
-
-
         
         playerPos = -1;
         oppPos = -1;
@@ -250,7 +314,123 @@ public class battleMockUp implements KeyListener{
         swordLabel.setVisible(false);
         frame.add(swordLabel, new Rectangle(sx, sy, 2, 2));
 
+        playerHPBar = new JProgressBar(0, 200);
+        playerHPBar.setStringPainted(true);
+        playerHPBar.setForeground(Color.GREEN);
+        playerHPBar.setBackground(Color.DARK_GRAY);
+        playerHPBar.setBorderPainted(true);
+        playerHPBar.setFont(new Font("Monospaced", Font.BOLD, 14));
+        playerHPBar.setBorder(BorderFactory.createLineBorder(Color.BLACK, 5));
 
+        enemyHPBar = new JProgressBar(0, 1000);
+        enemyHPBar.setStringPainted(true);
+        enemyHPBar.setForeground(Color.RED);
+        enemyHPBar.setBackground(Color.DARK_GRAY);
+        enemyHPBar.setBorderPainted(true);
+        enemyHPBar.setBorder(BorderFactory.createLineBorder(Color.BLACK, 5));
+
+        updateHealthBars();
+        
+        frame.add(playerHPBar, new Rectangle(1, 2, 4, 1));
+        frame.add(enemyHPBar, new Rectangle(7, 2, 4, 1));
+        
+        
+        JLabel playerText = new JLabel("Player Health:");
+        playerText.setForeground(Color.WHITE);
+        playerText.setFont(new Font("Monospaced", Font.BOLD, 14));
+
+        JLabel enemyText = new JLabel("Enemy Health:");
+        enemyText.setForeground(Color.WHITE);
+        enemyText.setFont(new Font("Monospaced", Font.BOLD, 14));
+        
+        frame.add(playerText, new Rectangle(1, 1, 4, 1));
+        frame.add(enemyText, new Rectangle(7, 1, 4, 1));
+        
+        battleMessage = new JLabel("Choose an action...");
+        battleMessage.setHorizontalAlignment(SwingConstants.CENTER);
+        battleMessage.setForeground(Color.WHITE);
+        battleMessage.setBackground(Color.BLACK);
+        battleMessage.setOpaque(true);
+        battleMessage.setBorder(BorderFactory.createLineBorder(Color.BLACK, 5));
+        battleMessage.setFont(new Font("Monospaced", Font.BOLD, 18));
+
+        frame.add(battleMessage, new Rectangle(1, 7, 10, 1));
+        
+        movePanel = new JPanel();
+        movePanel.setLayout(new GridLayout(2, 2, 5, 5));
+        movePanel.setBackground(Color.BLACK);
+        movePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        
+        JButton move1 = createMoveButton("Jab");
+        JButton move2 = createMoveButton("Sword Strike");
+        JButton move3 = createMoveButton("Shield Block");
+        JButton move4 = createMoveButton("");
+        
+        move1.addActionListener(e -> {
+            if (!attackOnCooldown) {
+                performAttack();
+                if (oh > 0) {
+                    oh -= 100;
+                    if (oh < 0) oh = 0;
+
+                    updateHealthBars();
+                    showMessage("Enemy Hit!");
+                }
+                animMode = 1;
+            }
+            
+        });
+        move2.addActionListener(e -> {
+            if (!attackOnCooldown) {
+                performAttack();
+                if (oh > 0) {
+                    oh -= 200;
+                    if (oh < 0) oh = 0;
+
+                    updateHealthBars();
+                    showMessage("Enemy Hit!");
+                }
+                animMode = 2;
+            }
+        });
+        move3.addActionListener(e -> {
+            end = System.currentTimeMillis();
+            time = (end - beginning) / 1000f;
+            
+            if (time >= 1.44 && time <= 1.75) {
+                if (!parryWindowActive) {
+                    showMessage("No attack to parry!");
+                    return;
+                }
+
+                if (hasParried) {
+                    showMessage("Already parried, you cannot parry again!");
+                    return;
+                }
+                if (!hasFailedParry) {
+                    hasParried = true;
+                    showMessage("Parried!");
+                }
+                
+            }
+            else {
+                if (hasFailedParry) {
+                    showMessage("Already parried, you cannot parry again!");
+                }
+                else {
+                    showMessage("You failed the Parry!");
+                    hasFailedParry = true;
+                }
+            }
+            
+        });
+        
+        movePanel.add(move1);
+        movePanel.add(move2);
+        movePanel.add(move3);
+        movePanel.add(move4);
+        
+        frame.add(movePanel, new Rectangle(1, 8, 10, 3));
         
         int x = 0, y = 0;
         for (int n = 0; n < dynamicMap.length; n++) {
@@ -261,8 +441,6 @@ public class battleMockUp implements KeyListener{
                 y++;
             }
         }
-        
-        
 
         frame.setSize(frameWidth, frameHeight);
         frame.setVisible(true);
@@ -271,7 +449,20 @@ public class battleMockUp implements KeyListener{
 
         frame.addKeyListener(this);
     }
+    
+    private JButton createMoveButton(String name) {
+        JButton move = new JButton(name);
 
+        move.setFont(new Font("Times New Roman", Font.BOLD, 16));
+        move.setFocusPainted(false);
+
+        move.setBackground(Color.DARK_GRAY);
+        move.setForeground(Color.WHITE);
+
+        move.setBorder(BorderFactory.createLineBorder(Color.BLACK, 5));
+
+        return move;
+    }
 
     
     public void timeStart(){
@@ -284,19 +475,49 @@ public class battleMockUp implements KeyListener{
         if (!hasTakenDamage) {
             if (ph > 100) {
                 ph -= 100;
+                playerHPBar.setValue(ph);
                 System.out.println("You got hit, Health: " + ph + "/200");
             } else {
                 ph -= 100;
+                updateHealthBars();
                 JOptionPane.showMessageDialog(frame, "You died EZ KID", "Lose", JOptionPane.INFORMATION_MESSAGE);
                 playerWon = false;
                 battleFinished = true;
 
                 swordTimer.stop();
                 frame.dispose();
-
             }
             hasTakenDamage = true;
         }
+    }
+    
+    private void performAttack() {
+        if (swordActive || attackOnCooldown) return;
+
+        attackOnCooldown = true;
+        parryWindowActive = true;
+        hasParried = false;
+        hasFailedParry = false;
+        hasTakenDamage = false;
+
+        timeStart();
+
+        swordActive = true;
+        swordStartTime = System.currentTimeMillis();
+
+        swordTimer.start();
+    }
+    
+    private void updateHealthBars() {
+        playerHPBar.setValue(ph);
+        playerHPBar.setString(ph + " / 200");
+
+        enemyHPBar.setValue(oh);
+        enemyHPBar.setString(oh + " / 1000");
+    }
+    
+    private void showMessage(String text) {
+        battleMessage.setText(text);
     }
     
     public boolean startBattleAndWait() {
@@ -322,51 +543,7 @@ public class battleMockUp implements KeyListener{
     @Override
     public void keyPressed(KeyEvent ke) {
 
-        switch(ke.getKeyCode()) {
-            case KeyEvent.VK_RIGHT -> {
-                timeStart();
-                swordActive = true;
-                swordStartTime = System.currentTimeMillis();
-                hasParried = false;
-                hasTakenDamage = false;
-                if (oh > 0) {
-                    oh -= 100;
-                    if (oh < 0) oh = 0;
-                    System.out.println("You hit the enemy, Enemy Health: " + oh + "/1000");
-
-                if (oh == 0) {
-                    hasParried = true;      // enemy cannot hit back
-                    hasTakenDamage = true; // safety
-                    // DO NOT end battle here
-                }
-
-
-            }
-
-                swordTimer.start();
-            }
-
-            case KeyEvent.VK_LEFT -> {
-                end = System.currentTimeMillis();
-                time = (end - beginning) / 1000f;
-
-                if (time >= 1.44 && time <= 1.75) {
-                    if (!hasParried) {
-                        System.out.println("Parry");
-                        hasParried = true;
-                    } else {
-                        System.out.println("You already parried");
-                        takeDamage();
-                    }
-                } else {
-                    System.out.println("You failed the parry");
-                    takeDamage();
-                }
-            }
-        }
     }
-
-
 
     @Override
     public void keyReleased(KeyEvent ke) {
