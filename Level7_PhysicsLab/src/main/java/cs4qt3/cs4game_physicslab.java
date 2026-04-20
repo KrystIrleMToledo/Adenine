@@ -5,9 +5,11 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap; 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.*;
+import java.nio.file.*;
 public class cs4game_physicslab implements KeyListener{
     private ImageIcon loadAndScale(String path, int width, int height){
     ImageIcon icon = new ImageIcon(path);
@@ -61,9 +63,6 @@ public class cs4game_physicslab implements KeyListener{
     enum direction {
     up, down, left, right
     }
-    
-    
-    
     direction lastdirection = direction.down;
     Timer idleTimer;
     int completion = 0;
@@ -263,6 +262,7 @@ public class cs4game_physicslab implements KeyListener{
         }
         frame.setSize(frameWidth,frameHeight);
         frame.setVisible(true);
+        startMap1Timer();   
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setResizable(false);
         frame.addKeyListener(this);
@@ -372,6 +372,7 @@ public class cs4game_physicslab implements KeyListener{
             if (openLockerRevealed && target == OPEN_LOCKER_POS) {
                 JOptionPane.showMessageDialog(frame, "The locker swings open... a dark passage leads downward.", "Message", JOptionPane.INFORMATION_MESSAGE);
                 frame.setVisible(false);
+                pauseMap1Timer();   
                 if (backroomRef == null) {
                     backroomRef = new cs4backroom(this);
                     backroomRef.setFrame();
@@ -471,6 +472,28 @@ public class cs4game_physicslab implements KeyListener{
                 return;
             }
         }
+    }
+    private void startMap1Timer() {
+        cs4backroom.clearInventoryFile();
+        try { java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(cs4backroom.TIMER_FILE)); }
+        catch (java.io.IOException ignored) {}
+        java.util.Map<String, String> data = new java.util.HashMap<>();
+        data.put("map1StartMs",   String.valueOf(System.currentTimeMillis()));
+        data.put("map1ElapsedMs", "0");
+        data.put("map2StartMs",   "0");
+        data.put("totalElapsedMs","0");
+        data.put("completed",     "false");
+        cs4backroom.writeTimerFile(data);
+    }
+    private void pauseMap1Timer() {
+        java.util.Map<String, String> data = cs4backroom.readTimerFile();
+        long start = 0;
+        try { start = Long.parseLong(data.getOrDefault("map1StartMs", "0")); }
+        catch (NumberFormatException ignored) {}
+        long elapsed = (start > 0) ? (System.currentTimeMillis() - start) : 0;
+        data.put("map1ElapsedMs", String.valueOf(elapsed));
+        data.put("map1StartMs",   "0");   
+        cs4backroom.writeTimerFile(data);
     }
     public JFrame getFrame() { return frame; }
     private void revealOpenLocker() {
