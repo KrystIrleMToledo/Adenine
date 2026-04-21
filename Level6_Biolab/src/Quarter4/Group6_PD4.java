@@ -4,23 +4,17 @@ import Quarter2.GraphPaperLayout;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class Group6_PD4 implements KeyListener {
     JFrame frame;
     ImageIcon board1, board2, corner, door, floor, gray, green, seat, table, w1, w2, boyfront, boyback, blob, chest;
-    ImageIcon boyidle1;
-    ImageIcon boyidle2;
-    ImageIcon boyidle3;
-    ImageIcon boyidle4;
-    ImageIcon boywalk1;
-    ImageIcon boywalk2;
-    ImageIcon boywalk3;
-    ImageIcon boywalk4;
-    ImageIcon boywalk5;
-    ImageIcon boywalk6;
-    ImageIcon boywalk7;
-    ImageIcon boywalk8;
+    ImageIcon playerIdle1, playerIdle2, playerIdle3, playerIdle4;
+    ImageIcon playerWalk1, playerWalk2, playerWalk3, playerWalk4;
+    ImageIcon playerWalk5, playerWalk6, playerWalk7, playerWalk8;
     
     JLabel tiles[];
     JLabel character[];
@@ -38,6 +32,21 @@ public class Group6_PD4 implements KeyListener {
     boolean hasCollision = false;
     boolean quizFinished = false;
     boolean chestOpened = false;
+    String playerType = "boy";;
+    
+    private void loadPlayerType() {
+            try {
+                BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+                String line = br.readLine();
+                if (line != null) {
+                    playerType = line.trim().toLowerCase();
+                }
+                br.close();
+            } catch (IOException e) {
+                System.out.println("substitute.txt not found, defaulting to boy");
+                playerType = "boy";
+            }
+        }
 
     JProgressBar blobHPBar;
 
@@ -55,7 +64,34 @@ public class Group6_PD4 implements KeyListener {
 
     int[] answers = {1, 2, 2};
 
+    private void loadPlayerSprites() {
+        String prefix;
+
+        if (playerType.equals("girl")) {
+            prefix = "girl";
+        } else {
+            prefix = "boy";
+        }
+
+        // IDLE
+        playerIdle1 = scale("Images/" + prefix + "idle1.png");
+        playerIdle2 = scale("Images/" + prefix + "idle2.png");
+        playerIdle3 = scale("Images/" + prefix + "idle3.png");
+        playerIdle4 = scale("Images/" + prefix + "idle4.png");
+
+        // WALK
+        playerWalk1 = scale("Images/" + prefix + "walk1.png");
+        playerWalk2 = scale("Images/" + prefix + "walk2.png");
+        playerWalk3 = scale("Images/" + prefix + "walk3.png");
+        playerWalk4 = scale("Images/" + prefix + "walk4.png");
+        playerWalk5 = scale("Images/" + prefix + "walk5.png");
+        playerWalk6 = scale("Images/" + prefix + "walk6.png");
+        playerWalk7 = scale("Images/" + prefix + "walk7.png");
+        playerWalk8 = scale("Images/" + prefix + "walk8.png");
+    }
     public Group6_PD4() {
+        loadPlayerType();
+        loadPlayerSprites();
         frame = new JFrame("BIO LAB");
         characterPosition = -1;
         characterMode = 0;
@@ -75,19 +111,6 @@ public class Group6_PD4 implements KeyListener {
         boyback = new ImageIcon("Images/boyback.png");
         blob = new ImageIcon("Images/blob1.png");
         chest = new ImageIcon("Images/chest.png");
-        
-        boyidle1 = new ImageIcon("Images/boyidle1.png");
-        boyidle2 = new ImageIcon("Images/boyidle2.png");
-        boyidle3 = new ImageIcon("Images/boyidle3.png");
-        boyidle4 = new ImageIcon("Images/boyidle4.png");
-        boywalk1 = new ImageIcon("Images/boywalk1.png");
-        boywalk2 = new ImageIcon("Images/boywalk2.png");
-        boywalk3 = new ImageIcon("Images/boywalk3.png");
-        boywalk4 = new ImageIcon("Images/boywalk4.png");
-        boywalk5 = new ImageIcon("Images/boywalk5.png");
-        boywalk6 = new ImageIcon("Images/boywalk6.png");
-        boywalk7 = new ImageIcon("Images/boywalk7.png");
-        boywalk8 = new ImageIcon("Images/boywalk8.png");
                 
         board1 = new ImageIcon(board1.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
         board2 = new ImageIcon(board2.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
@@ -104,20 +127,7 @@ public class Group6_PD4 implements KeyListener {
         boyback = new ImageIcon(boyback.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
         blob = new ImageIcon(blob.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
         chest = new ImageIcon(chest.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        
-        boyidle1 = new ImageIcon(boyidle1.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        boyidle2 = new ImageIcon(boyidle2.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        boyidle3 = new ImageIcon(boyidle3.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        boyidle4 = new ImageIcon(boyidle4.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        boywalk1 = new ImageIcon(boywalk1.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        boywalk2 = new ImageIcon(boywalk2.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        boywalk3 = new ImageIcon(boywalk3.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        boywalk4 = new ImageIcon(boywalk4.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        boywalk5 = new ImageIcon(boywalk5.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        boywalk6 = new ImageIcon(boywalk6.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        boywalk7 = new ImageIcon(boywalk7.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        boywalk8 = new ImageIcon(boywalk8.getImage().getScaledInstance(frameWidth / mapWidth, frameHeight / mapHeight, Image.SCALE_DEFAULT));
-        
+
         
         //map
         mapLayout = new int[]{
@@ -159,7 +169,7 @@ public class Group6_PD4 implements KeyListener {
             character[i] = new JLabel();
 
             if (characterPlace[i] == 1) {
-                character[i].setIcon(boyidle1);
+                character[i].setIcon(playerIdle1);
                 characterPosition = i;
             }
 
@@ -241,16 +251,16 @@ public class Group6_PD4 implements KeyListener {
             if((characterPosition+1)%mapWidth != 0 && hasCollision == false){
                 character[characterPosition].setIcon(null);
                 if(characterMode==0){
-                    character[characterPosition+1].setIcon(boywalk3);
+                    character[characterPosition+1].setIcon(playerWalk3);
                     characterMode=1;
                 }
                 else{
-                    character[characterPosition+1].setIcon(boywalk7);
+                    character[characterPosition+1].setIcon(playerWalk7);
                     characterMode=0;
                 }
                 characterPosition++;
             } else {
-                character[characterPosition].setIcon(boyidle3);
+                character[characterPosition].setIcon(playerIdle3);
             }
         }
         if (e.getKeyCode() == KeyEvent.VK_LEFT){
@@ -262,16 +272,16 @@ public class Group6_PD4 implements KeyListener {
             if((characterPosition-1)%mapWidth != 0 && hasCollision == false){
                 character[characterPosition].setIcon(null);
                 if(characterMode==0){
-                    character[characterPosition-1].setIcon(boywalk4);
+                    character[characterPosition-1].setIcon(playerWalk4);
                     characterMode=1;
                 }
                 else{
-                    character[characterPosition-1].setIcon(boywalk8);
+                    character[characterPosition-1].setIcon(playerWalk8);
                     characterMode=0;
                 }
                 characterPosition--;
             } else {
-                character[characterPosition].setIcon(boyidle2);
+                character[characterPosition].setIcon(playerIdle2);
             }
         }
         if (e.getKeyCode() == KeyEvent.VK_DOWN){
@@ -283,15 +293,15 @@ public class Group6_PD4 implements KeyListener {
             if((characterPosition+mapWidth < mapWidth*mapHeight) && hasCollision == false){
                 character[characterPosition].setIcon(null);
                 if(characterMode==0){
-                    character[characterPosition+=mapWidth].setIcon(boywalk1);
+                    character[characterPosition+=mapWidth].setIcon(playerWalk1);
                     characterMode=1;
                 }
                 else{
-                    character[characterPosition+=mapWidth].setIcon(boywalk2);
+                    character[characterPosition+=mapWidth].setIcon(playerWalk2);
                     characterMode=0;
                 }
             } else {
-                character[characterPosition].setIcon(boyidle1);
+                character[characterPosition].setIcon(playerIdle1);
             }
         };
         if (e.getKeyCode() == KeyEvent.VK_UP){   
@@ -303,15 +313,15 @@ public class Group6_PD4 implements KeyListener {
             if((characterPosition-mapWidth > -1) && hasCollision == false){
                 character[characterPosition].setIcon(null);
                 if(characterMode==0){
-                    character[characterPosition-=mapWidth].setIcon(boywalk6);
+                    character[characterPosition-=mapWidth].setIcon(playerWalk6);
                     characterMode=1;
                 }
                 else{
-                    character[characterPosition-=mapWidth].setIcon(boywalk5);
+                    character[characterPosition-=mapWidth].setIcon(playerWalk5);
                     characterMode=0;
                 }
             } else {
-                character[characterPosition].setIcon(boyidle4);
+                character[characterPosition].setIcon(playerIdle4);
             }
         }
         if (mapLayout[characterPosition] == 11 && !quizFinished) {
