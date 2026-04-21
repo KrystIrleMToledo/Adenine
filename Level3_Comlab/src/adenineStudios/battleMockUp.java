@@ -3,6 +3,9 @@ package adenineStudios;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class battleMockUp implements KeyListener{
     long beginning;
@@ -84,6 +87,7 @@ public class battleMockUp implements KeyListener{
     
     private boolean battleFinished = false;
     private boolean playerWon = false;
+    boolean loaded = false;
 
     JProgressBar playerHPBar;
     JProgressBar enemyHPBar;
@@ -294,6 +298,7 @@ public class battleMockUp implements KeyListener{
     }
     
     public void setFrame() {
+        saveHandling();
         frame.setLayout(new GraphPaperLayout(new Dimension(mapWidth, mapHeight)));
 
         int px = playerPos % mapWidth;
@@ -448,6 +453,38 @@ public class battleMockUp implements KeyListener{
         frame.setResizable(false);
 
         frame.addKeyListener(this);
+    }
+    
+    public void saveHandling(){
+        try{
+            if(loaded == false){
+                FileReader spriteRead = new FileReader("substitute.txt");
+                try (BufferedReader spriteReader
+                        = new BufferedReader(spriteRead)) {
+                    String spriteVal = spriteReader.readLine();
+                    if(!spriteVal.equals("boy")){
+                        System.out.print("a");
+                        defaultPlayer = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        
+                        defaultPlayer = new ImageIcon(defaultPlayer.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+                        
+                        for(int x = 0; x < playerMap.length; x++){
+                            switch(playerStarting[x]){
+                                case 0 -> playerMap[x] = new JLabel();
+                                case 1 -> {
+                                    playerMap[x] = new JLabel(defaultPlayer);
+                                    playerPos = x;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e){
+            System.out.print("IO error, save may be baddd");
+        } catch (NumberFormatException e){
+            System.out.print("idk wtf is happening here ngl");
+        }
     }
     
     private JButton createMoveButton(String name) {

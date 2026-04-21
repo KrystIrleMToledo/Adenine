@@ -2,9 +2,15 @@ package adenineStudios;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class bossMapG3 implements KeyListener{
+    boolean loaded = false;
     JFrame frame;
     
     private int forComp = 0;
@@ -167,6 +173,7 @@ public class bossMapG3 implements KeyListener{
     }
     
     public void setFrame(){
+        saveHandling();
         frame.setLayout(new GraphPaperLayout(new Dimension(mapWidth, mapHeight)));
         
         //place player on map
@@ -197,6 +204,63 @@ public class bossMapG3 implements KeyListener{
         frame.setResizable(false);
         
         frame.addKeyListener(this);
+    }
+    
+    public void saveHandling(){
+        try{
+            if(loaded == false){
+                FileReader spriteRead = new FileReader("substitute.txt");
+                try (BufferedReader spriteReader
+                        = new BufferedReader(spriteRead)) {
+                    String spriteVal = spriteReader.readLine();
+                    if(!spriteVal.equals("boy")){
+                        System.out.print("a");
+                        defaultPlayer = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        defaultPlayerR = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        defaultPlayerL = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        defaultPlayerU = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+
+                        walkPlayer = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        walkPlayerR = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        walkPlayerL = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        walkPlayerU = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        walkPlayerAlt = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        walkPlayerAltR = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        walkPlayerAltL = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        walkPlayerAltU = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        
+                        defaultPlayer = new ImageIcon(defaultPlayer.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+                        defaultPlayerR = new ImageIcon(defaultPlayerR.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+                        defaultPlayerL = new ImageIcon(defaultPlayerL.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+                        defaultPlayerU = new ImageIcon(defaultPlayerU.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+
+                        walkPlayer = new ImageIcon(walkPlayer.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+                        walkPlayerR = new ImageIcon(walkPlayerR.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+                        walkPlayerL = new ImageIcon(walkPlayerL.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+                        walkPlayerU = new ImageIcon(walkPlayerU.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+
+                        walkPlayerAlt = new ImageIcon(walkPlayerAlt.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+                        walkPlayerAltR = new ImageIcon(walkPlayerAltR.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+                        walkPlayerAltL = new ImageIcon(walkPlayerAltL.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+                        walkPlayerAltU = new ImageIcon(walkPlayerAltU.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+                        
+                        for(int x = 0; x < playerMap.length; x++){
+                            switch(playerStarting[x]){
+                                case 0 -> playerMap[x] = new JLabel();
+                                case 1 -> {
+                                    playerMap[x] = new JLabel(defaultPlayer);
+                                    playerPos = x;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e){
+            System.out.print("IO error, save may be baddd");
+        } catch (NumberFormatException e){
+            System.out.print("idk wtf is happening here ngl");
+        }
     }
     
     public void bossFight(){
