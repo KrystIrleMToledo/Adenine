@@ -256,7 +256,11 @@ public class Q4PD8 extends JPanel {
     private void showRetryOption(String reason) {
         int choice = JOptionPane.showConfirmDialog(this, reason + "\nRetry?", "Game Over", JOptionPane.YES_NO_OPTION);
         if (choice == JOptionPane.YES_OPTION) resetGame();
-        else System.exit(0);
+        else {
+            window.dispose();
+            new csLabMapG3().gr3();
+        }
+              
     }
 
     private void displayMessage(String m) { JOptionPane.showMessageDialog(this, m); }
