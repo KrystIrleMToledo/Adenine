@@ -282,19 +282,19 @@ public class csLabMapG3 implements KeyListener{
                     String spriteVal = spriteReader.readLine();
                     if(!spriteVal.equals("boy")){
                         System.out.print("a");
-                        defaultPlayer = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
-                        defaultPlayerR = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
-                        defaultPlayerL = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
-                        defaultPlayerU = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        defaultPlayer = new ImageIcon("Images/adenineStudios/gamesprites/girlidle1.png");
+                        defaultPlayerR = new ImageIcon("Images/adenineStudios/gamesprites/girlidle4.png");
+                        defaultPlayerL = new ImageIcon("Images/adenineStudios/gamesprites/girlidle3.png");
+                        defaultPlayerU = new ImageIcon("Images/adenineStudios/gamesprites/girlidle2.png");
 
-                        walkPlayer = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
-                        walkPlayerR = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
-                        walkPlayerL = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
-                        walkPlayerU = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
-                        walkPlayerAlt = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
-                        walkPlayerAltR = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
-                        walkPlayerAltL = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
-                        walkPlayerAltU = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        walkPlayer = new ImageIcon("Images/adenineStudios/gamesprites/girlwalk1.png");
+                        walkPlayerR = new ImageIcon("Images/adenineStudios/gamesprites/girlwalk5.png");
+                        walkPlayerL = new ImageIcon("Images/adenineStudios/gamesprites/girlwalk6.png");
+                        walkPlayerU = new ImageIcon("Images/adenineStudios/gamesprites/girlwalk3.png");
+                        walkPlayerAlt = new ImageIcon("Images/adenineStudios/gamesprites/girlwalk2.png");
+                        walkPlayerAltR = new ImageIcon("Images/adenineStudios/gamesprites/girlwalk7.png");
+                        walkPlayerAltL = new ImageIcon("Images/adenineStudios/gamesprites/girlwalk8.png");
+                        walkPlayerAltU = new ImageIcon("Images/adenineStudios/gamesprites/girlwalk4.png");
                         
                         defaultPlayer = new ImageIcon(defaultPlayer.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
                         defaultPlayerR = new ImageIcon(defaultPlayerR.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));

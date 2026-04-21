@@ -464,7 +464,7 @@ public class battleMockUp implements KeyListener{
                     String spriteVal = spriteReader.readLine();
                     if(!spriteVal.equals("boy")){
                         System.out.print("a");
-                        defaultPlayer = new ImageIcon("Images/adenineStudios/gamesprites/sword1.png");
+                        defaultPlayer = new ImageIcon("Images/adenineStudios/gamesprites/girlidle4.png");
                         
                         defaultPlayer = new ImageIcon(defaultPlayer.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
                         
