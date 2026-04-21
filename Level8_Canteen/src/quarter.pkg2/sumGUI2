@@ -1,3 +1,5 @@
+
+Heaven Ronelle
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
@@ -7,6 +9,7 @@ package Q2;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 
 public class sumGUI2 implements KeyListener, MouseListener {
     class InvalidKeyException extends Exception {
@@ -18,6 +21,8 @@ public class sumGUI2 implements KeyListener, MouseListener {
     ImageIcon floorTile, brickVendingMachine, singleTable, fourTopTable;
     ImageIcon cashierCounterHalf1, cashierCounterHalf2, cashierCounterHalf3, cashierCounterHalf4;
     ImageIcon playerIcon, playerIconfront, playerIconfront2, playerIconback, playerIconback2, playerIconleft, playerIconright, fork;
+    ImageIcon playerIconleft2, playerIconright2;
+    String playerType = "boy";
 
     JLabel tiles[];
     JLabel character[];
@@ -44,8 +49,23 @@ public class sumGUI2 implements KeyListener, MouseListener {
         {"Who's the shortest ever?", "reilly", "marlowe", "paula", "zionne", "0"},
         {"What goes down always comes up?", "bird", "balloon", "67", "air", "2"}
     };
+    
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (Exception e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
 
     public sumGUI2(){
+        loadPlayerType(); // ADD THIS
         frame=new JFrame("Canteen Map Viewer");
         characterPosition=-1;
        
@@ -60,12 +80,91 @@ public class sumGUI2 implements KeyListener, MouseListener {
         cashierCounterHalf3 = new ImageIcon(new ImageIcon("Images1/cashierhalf3.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
         cashierCounterHalf4 = new ImageIcon(new ImageIcon("Images1/cashierhalf4.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
         
-        playerIconfront = playerIcon = new ImageIcon(new ImageIcon("Images1/boyidle1.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconfront2 = new ImageIcon(new ImageIcon("Images1/boywalk1.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconback  = new ImageIcon(new ImageIcon("Images1/boywalk6.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconback2 = new ImageIcon(new ImageIcon("Images1/boywalk5.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconright = new ImageIcon(new ImageIcon("Images1/boywalk3.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconleft = new ImageIcon(new ImageIcon("Images1/boywalk4.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
+        if (playerType.equals("girl")) {
+
+            playerIconfront = playerIcon = new ImageIcon(
+                new ImageIcon("Images1/gplayer1.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconfront2 = new ImageIcon(
+                new ImageIcon("Images1/gplayer2.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback = new ImageIcon(
+                new ImageIcon("Images1/gplayer3.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback2 = new ImageIcon(
+                new ImageIcon("Images1/gplayer9.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright = new ImageIcon(
+                new ImageIcon("Images1/gplayer5.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft = new ImageIcon(
+                new ImageIcon("Images1/gplayer6.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright2 = new ImageIcon(
+                new ImageIcon("Images1/gplayer7.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft2 = new ImageIcon(
+                new ImageIcon("Images1/gplayer8.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+        } else {
+
+            playerIconfront = playerIcon = new ImageIcon(
+                new ImageIcon("Images1/boyidle1.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconfront2 = new ImageIcon(
+                new ImageIcon("Images1/boywalk1.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback  = new ImageIcon(
+                new ImageIcon("Images1/boywalk6.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback2 = new ImageIcon(
+                new ImageIcon("Images1/boywalk5.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright = new ImageIcon(
+                new ImageIcon("Images1/boywalk3.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft = new ImageIcon(
+                new ImageIcon("Images1/boywalk4.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright2 = new ImageIcon(
+                new ImageIcon("Images1/boywalk7.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft2 = new ImageIcon(
+                new ImageIcon("Images1/boywalk8.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+        }
+        
         fork = new ImageIcon(new ImageIcon("Images1/fork.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
         try {
             character=new JLabel[mapWidth*mapHeight];
@@ -134,7 +233,7 @@ public class sumGUI2 implements KeyListener, MouseListener {
                 tiles[i] = new JLabel(cashierCounterHalf1);
             else if (mapLayout[i] == 7) 
                 tiles[i] = new JLabel(cashierCounterHalf2);
-            else if (mapLayout[i] == 8)
+            else if (mapLayout[i] == 😎
                 tiles[i] = new JLabel(cashierCounterHalf3);
             else if (mapLayout[i] == 9) 
                 tiles[i] = new JLabel(cashierCounterHalf4);
@@ -195,13 +294,25 @@ public class sumGUI2 implements KeyListener, MouseListener {
             if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
                 if (characterPosition % mapWidth != mapWidth - 1) {
                     newPosition = characterPosition + 1;
-                    playerIcon = playerIconright;
+                    if (characterMode == 0) {
+                        playerIcon = playerIconright;
+                        characterMode = 1;
+                    } else {
+                        playerIcon = playerIconright2;
+                        characterMode = 0;
+                    }
                 }
             }
             else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                 if (characterPosition % mapWidth != 0) {
                     newPosition = characterPosition - 1;
-                    playerIcon = playerIconleft;
+                    if (characterMode == 0) {
+                        playerIcon = playerIconleft;
+                        characterMode = 1;
+                    } else {
+                        playerIcon = playerIconleft2;
+                        characterMode = 0;
+                    }
                 }
             }
             else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
