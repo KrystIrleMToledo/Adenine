@@ -322,7 +322,3 @@ public class Q4_PD7 implements KeyListener {
         SwingUtilities.invokeLater(Q4_PD7::new);
     }
 }
-Write to Heaven Ronelle Fernandez
-
-    }
-}
