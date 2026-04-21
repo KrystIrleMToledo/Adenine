@@ -51,6 +51,21 @@ public class Q4PD8 extends JPanel {
 
     private ArrayList<LoggedItem> collectionLog = new ArrayList<>();
 
+    //DIS
+    String playerType = "girl"; //default
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
 
     public Q4PD8(PD8 window) {
         this.window = window;
@@ -248,18 +263,33 @@ public class Q4PD8 extends JPanel {
     private void displayMessage(String m, ImageIcon i) { JOptionPane.showMessageDialog(this, m, "Log", 1, i); }
 
     private void loadAssets() {
-        boyidlefront = loadImg("PD8_assets/boyidlefront.png");
-        boyidleback = loadImg("PD8_assets/boyidleback.png");
+
+        loadPlayerType();
+        System.out.println(playerType);
         directionalFrames = new HashMap<>();
-        directionalFrames.put(KeyEvent.VK_S, new ImageIcon[]{loadImg("PD8_assets/boywalkfront1.png"), loadImg("PD8_assets/boywalkfront2.png")});
-        directionalFrames.put(KeyEvent.VK_W, new ImageIcon[]{loadImg("PD8_assets/boywalkbehind1.png"), loadImg("PD8_assets/boywalkbehind2.png")});
-        directionalFrames.put(KeyEvent.VK_A, new ImageIcon[]{loadImg("PD8_assets/leftfrontprof.png"), loadImg("PD8_assets/leftbackprof.png")});
-        directionalFrames.put(KeyEvent.VK_D, new ImageIcon[]{loadImg("PD8_assets/rightfrontprof.png"), loadImg("PD8_assets/rightbackprof.png")});
-        tile = loadImg("PD8_assets/40.png"); wall = loadImg("PD8_assets/41.png");
-        shelf_L = loadImg("PD8_assets/2.png"); shelf_R = loadImg("PD8_assets/3.png");
-        shelf_L2 = loadImg("PD8_assets/12.png"); shelf_R2 = loadImg("PD8_assets/13.png");
-        shelf_L3 = loadImg("PD8_assets/8.png"); shelf_R3 = loadImg("PD8_assets/9.png");
-        oldmanIcon = loadImg("PD8_assets/oldman.png"); oldmanDesk = loadImg("PD8_assets/1.png");
+
+        if(playerType.equals("girl")){
+            boyidlefront = loadImg("PD8_assets/girlidle1.png");
+            boyidleback = loadImg("PD8_assets/girlidle2.png");
+            directionalFrames = new HashMap<>();
+            directionalFrames.put(KeyEvent.VK_S, new ImageIcon[]{loadImg("PD8_assets/girlwalk1.png"), loadImg("PD8_assets/girlidle1.png"), loadImg("PD8_assets/girlwalk2.png")});
+            directionalFrames.put(KeyEvent.VK_W, new ImageIcon[]{loadImg("PD8_assets/girlwalk3.png"), loadImg("PD8_assets/girlidle2.png"), loadImg("PD8_assets/girlwalk4.png")});
+            directionalFrames.put(KeyEvent.VK_A, new ImageIcon[]{loadImg("PD8_assets/girlwalk6.png"), loadImg("PD8_assets/girlidle3.png"), loadImg("PD8_assets/girlwalk8.png")});
+            directionalFrames.put(KeyEvent.VK_D, new ImageIcon[]{loadImg("PD8_assets/girlwalk5.png"), loadImg("PD8_assets/girlidle4.png"), loadImg("PD8_assets/girlwalk7.png")});
+        }else{   
+            boyidlefront = loadImg("PD8_assets/boyidle1.png");
+            boyidleback = loadImg("PD8_assets/boyidle4.png");
+            directionalFrames = new HashMap<>();
+            directionalFrames.put(KeyEvent.VK_S, new ImageIcon[]{loadImg("PD8_assets/boywalk1.png"), loadImg("PD8_assets/boyidle1.png"), loadImg("PD8_assets/boywalk2.png")});
+            directionalFrames.put(KeyEvent.VK_W, new ImageIcon[]{loadImg("PD8_assets/boywalk5.png"), loadImg("PD8_assets/boyidle4.png"), loadImg("PD8_assets/boywalk6.png")});
+            directionalFrames.put(KeyEvent.VK_A, new ImageIcon[]{loadImg("PD8_assets/boywalk4.png"), loadImg("PD8_assets/boyidle2.png"), loadImg("PD8_assets/boywalk8.png")});
+            directionalFrames.put(KeyEvent.VK_D, new ImageIcon[]{loadImg("PD8_assets/boywalk3.png"), loadImg("PD8_assets/boyidle3.png"), loadImg("PD8_assets/boywalk7.png")});
+        }
+            tile = loadImg("PD8_assets/40.png"); wall = loadImg("PD8_assets/41.png");
+            shelf_L = loadImg("PD8_assets/2.png"); shelf_R = loadImg("PD8_assets/3.png");
+            shelf_L2 = loadImg("PD8_assets/12.png"); shelf_R2 = loadImg("PD8_assets/13.png");
+            shelf_L3 = loadImg("PD8_assets/8.png"); shelf_R3 = loadImg("PD8_assets/9.png");
+            oldmanIcon = loadImg("PD8_assets/oldman.png"); oldmanDesk = loadImg("PD8_assets/1.png");
     }
 
     private ImageIcon loadImg(String p) {
