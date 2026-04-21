@@ -25,18 +25,9 @@ public class Group6_PD8 implements KeyListener {
     int characterPlace[];
     int mapWidth=8, mapHeight=8;
     int frameWidth=450, frameHeight=450;
-    ImageIcon boyidle1;
-    ImageIcon boyidle2;
-    ImageIcon boyidle3;
-    ImageIcon boyidle4;
-    ImageIcon boywalk1;
-    ImageIcon boywalk2;
-    ImageIcon boywalk3;
-    ImageIcon boywalk4;
-    ImageIcon boywalk5;
-    ImageIcon boywalk6;
-    ImageIcon boywalk7;
-    ImageIcon boywalk8;
+    ImageIcon playerIdle1, playerIdle2, playerIdle3, playerIdle4;
+    ImageIcon playerWalk1, playerWalk2, playerWalk3, playerWalk4;
+    ImageIcon playerWalk5, playerWalk6, playerWalk7, playerWalk8;
 
     int characterPosition;
     int characterMode;
@@ -57,8 +48,54 @@ public class Group6_PD8 implements KeyListener {
     boolean hasCollision = false;
     boolean quizFinished = false;
     boolean chestOpened = false;
+    String playerType = "boy";;
     
-    public Group6_PD8(){
+    
+    
+    private void loadPlayerType() {
+            try {
+                BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+                String line = br.readLine();
+                if (line != null) {
+                    playerType = line.trim().toLowerCase();
+                }
+                br.close();
+            } catch (IOException e) {
+                System.out.println("substitute.txt not found, defaulting to boy");
+                playerType = "boy";
+            }
+        }
+    private void loadPlayerSprites() {
+        String prefix;
+
+        if (playerType.equals("girl")) {
+            prefix = "girl";
+        } else {
+            prefix = "boy"; // default
+        }
+
+        // IDLE
+        playerIdle1 = new ImageIcon(new ImageIcon("Images/" + prefix + "idle1.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
+        playerIdle2 = new ImageIcon(new ImageIcon("Images/" + prefix + "idle2.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
+        playerIdle3 = new ImageIcon(new ImageIcon("Images/" + prefix + "idle3.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
+        playerIdle4 = new ImageIcon(new ImageIcon("Images/" + prefix + "idle4.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
+
+        // WALK
+        playerWalk1 = new ImageIcon(new ImageIcon("Images/" + prefix + "walk1.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
+        playerWalk2 = new ImageIcon(new ImageIcon("Images/" + prefix + "walk2.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
+        playerWalk3 = new ImageIcon(new ImageIcon("Images/" + prefix + "walk3.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
+        playerWalk4 = new ImageIcon(new ImageIcon("Images/" + prefix + "walk4.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
+        playerWalk5 = new ImageIcon(new ImageIcon("Images/" + prefix + "walk5.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
+        playerWalk6 = new ImageIcon(new ImageIcon("Images/" + prefix + "walk6.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
+        playerWalk7 = new ImageIcon(new ImageIcon("Images/" + prefix + "walk7.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
+        playerWalk8 = new ImageIcon(new ImageIcon("Images/" + prefix + "walk8.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
+
+        playerIcon = playerIdle1;
+    }
+ 
+        public Group6_PD8(){
+            loadPlayerType();
+            loadPlayerSprites();
         /*
         Planned objectives:
             Move the character using the arrow keys.
@@ -73,9 +110,6 @@ public class Group6_PD8 implements KeyListener {
         
         loadData();
         startTime = System.currentTimeMillis();
-        
-        playerIcon = new ImageIcon(new ImageIcon("Images/boyidle1.png")
-                .getImage().getScaledInstance(frameWidth/mapWidth,frameHeight/mapHeight,Image.SCALE_DEFAULT));
 
         smallflower = new ImageIcon(new ImageIcon("Images/NewMap/smallflower.png")
                 .getImage().getScaledInstance(frameWidth/mapWidth,frameHeight/mapHeight,Image.SCALE_DEFAULT));
@@ -121,21 +155,6 @@ public class Group6_PD8 implements KeyListener {
             new JLabel(img57), new JLabel(img58), new JLabel(img59), new JLabel(img60),new JLabel(img61), new JLabel(img62), new JLabel(img63), new JLabel(img64)
         };
         
-// IDLE
-        boyidle1 = new ImageIcon(new ImageIcon("Images/boyidle1.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
-        boyidle2 = new ImageIcon(new ImageIcon("Images/boyidle2.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
-        boyidle3 = new ImageIcon(new ImageIcon("Images/boyidle3.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
-        boyidle4 = new ImageIcon(new ImageIcon("Images/boyidle4.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
-
-// WALK
-        boywalk1 = new ImageIcon(new ImageIcon("Images/boywalk1.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
-        boywalk2 = new ImageIcon(new ImageIcon("Images/boywalk2.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
-        boywalk3 = new ImageIcon(new ImageIcon("Images/boywalk3.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
-        boywalk4 = new ImageIcon(new ImageIcon("Images/boywalk4.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
-        boywalk5 = new ImageIcon(new ImageIcon("Images/boywalk5.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
-        boywalk6 = new ImageIcon(new ImageIcon("Images/boywalk6.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
-        boywalk7 = new ImageIcon(new ImageIcon("Images/boywalk7.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
-        boywalk8 = new ImageIcon(new ImageIcon("Images/boywalk8.png").getImage().getScaledInstance(frameWidth/mapWidth, frameHeight/mapHeight, Image.SCALE_DEFAULT));
 
         character = new JLabel[64];
 
@@ -231,36 +250,36 @@ public class Group6_PD8 implements KeyListener {
         if(e.getKeyCode()==KeyEvent.VK_RIGHT){
             newPosition++;
             if(newPosition % mapWidth != 0 && characterPlace[newPosition] != 1){
-                movePlayer(newPosition, boywalk3, boywalk7, boyidle3);
+                movePlayer(newPosition, playerWalk3, playerWalk7, playerIdle3);
             } else {
-                character[characterPosition].setIcon(boyidle3);
+                character[characterPosition].setIcon(playerIdle3);
             }
         }
 
         if(e.getKeyCode()==KeyEvent.VK_LEFT){
             newPosition--;
             if(characterPosition % mapWidth != 0 && characterPlace[newPosition] != 1){
-                movePlayer(newPosition, boywalk4, boywalk8, boyidle2);
+                movePlayer(newPosition, playerWalk4, playerWalk8, playerIdle2);
             } else {
-                character[characterPosition].setIcon(boyidle2);
+                character[characterPosition].setIcon(playerIdle2);
             }
         }
 
         if(e.getKeyCode()==KeyEvent.VK_DOWN){
             newPosition += mapWidth;
             if(newPosition < 64 && characterPlace[newPosition] != 1){
-                movePlayer(newPosition, boywalk1, boywalk2, boyidle1);
+                movePlayer(newPosition, playerWalk1, playerWalk2, playerIdle1);
             } else {
-                character[characterPosition].setIcon(boyidle1);
+                character[characterPosition].setIcon(playerIdle1);
             }
         }
 
         if(e.getKeyCode()==KeyEvent.VK_UP){
             newPosition -= mapWidth;
             if(newPosition >= 0 && characterPlace[newPosition] != 1){
-                movePlayer(newPosition, boywalk6, boywalk5, boyidle4);
+                movePlayer(newPosition, playerWalk6, playerWalk5, playerIdle4);
             } else {
-                character[characterPosition].setIcon(boyidle4);
+                character[characterPosition].setIcon(playerIdle4);
             }
         }
 
