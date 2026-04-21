@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.io.*;
 
 public class Q4_PD7 implements KeyListener {
     JFrame frame;
@@ -35,10 +36,26 @@ public class Q4_PD7 implements KeyListener {
     int quiz1TileIndex = 33;
     int quiz2TileIndex = 14;
     int[] blockedTiles;
+    String playerType = "boy";
 
     private Clip backgroundMusic;
+    
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
 
     public Q4_PD7() {
+        loadPlayerType(); 
         loadLevel(1);
         setFrame();
     }
@@ -105,11 +122,13 @@ public class Q4_PD7 implements KeyListener {
         updateTileImage(11, "row-1-column-12.png");
         updateTileImage(23, "row-2-column-12.png");
 
-        walkDown = loadAnimation("boywalk1.png", "boywalk2.png");
-        walkRight = loadAnimation("boywalk3.png", "boywalk7.png");
-        walkLeft = loadAnimation("boywalk4.png", "boywalk8.png");
-        walkUp = loadAnimation("boywalk5.png", "boywalk6.png");
-        idles = loadAnimation("boyidle1.png", "boyidle2.png", "boyidle3.png", "boyidle4.png");
+        String prefix = playerType.equals("girl") ? "girl" : "boy";
+
+        walkDown = loadAnimation(prefix + "walk1.png", prefix + "walk2.png");
+        walkRight = loadAnimation(prefix + "walk3.png", prefix + "walk7.png");
+        walkLeft = loadAnimation(prefix + "walk4.png", prefix + "walk8.png");
+        walkUp = loadAnimation(prefix + "walk5.png", prefix + "walk6.png");
+        idles = loadAnimation(prefix + "idle1.png", prefix + "idle2.png", prefix + "idle3.png", prefix + "idle4.png");
 
         character = new JLabel[mapWidth * mapHeight];
         for (int i = 0; i < character.length; i++) {
@@ -301,5 +320,9 @@ public class Q4_PD7 implements KeyListener {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(Q4_PD7::new);
+    }
+}
+Write to Heaven Ronelle Fernandez
+
     }
 }
