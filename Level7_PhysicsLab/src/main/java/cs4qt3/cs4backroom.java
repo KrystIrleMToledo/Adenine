@@ -89,6 +89,20 @@ public class cs4backroom implements KeyListener {
     private static final int CHEST_POS = 28;
     private Map<Integer, GameObject> gameObjectRegistry = new HashMap<>();
     private cs4game_physicslab labRef;
+    private String playerType = "boy";
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
     private Map<String, String> readInventoryFile() {
         Map<String, String> data = new HashMap<>();
         Path path = Paths.get(INVENTORY_FILE);
@@ -201,6 +215,7 @@ public class cs4backroom implements KeyListener {
         init();
     }
     private void init() {
+        loadPlayerType();
         loadInventoryFile();
         gameObjectRegistry.put(TV,           new Item(TV,           "Television"));
         gameObjectRegistry.put(PENDULUM,     new Item(PENDULUM,     "Pendulum"));
@@ -208,15 +223,15 @@ public class cs4backroom implements KeyListener {
         gameObjectRegistry.put(CHEST_OPEN,   new Chest(CHEST_OPEN,   "Chest"));
         gameObjectRegistry.put(CHEST_CLOSED, new Chest(CHEST_CLOSED, "Chest"));
         frame = new JFrame("The Backrooms");
-        String[] spriteNames = {
-            "girl01","girl02","girl03","girl04","girl05","girl06",
-            "girl07","girl08","girl09","girl10","girl11","girl12","enemy"
-        };
-        for (String name : spriteNames) {
+        String prefix = playerType.equals("girl") ? "girl" : "boy";
+        String[] spriteNums = {"01","02","03","04","05","06","07","08","09","10","11","12"};
+        for (String num : spriteNums) {
+            String key = "girl" + num; // internal key stays the same for compatibility
+            String file = prefix + num;
             int w = 1000/12, h = 1000/12;
-            if (name.equals("enemy")) { w = 1300/12; h = 2000/12; }
-            playerSprites.put(name, loadAndScale("physicslabtiles/" + name + ".png", w, h));
+            playerSprites.put(key, loadAndScale("physicslabtiles/" + file + ".png", w, h));
         }
+        playerSprites.put("enemy", loadAndScale("physicslabtiles/enemy.png", 1300/12, 2000/12));
         mapLayout = new int[]{
             10,13, 4, 5,13,13,13,13,13,13,13,11,
              8, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 9,
@@ -301,7 +316,6 @@ public class cs4backroom implements KeyListener {
             int confirm = JOptionPane.showConfirmDialog(frame,
                 "Lock this item in? Are you sure?", "Confirm", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                //game ends here, when the item put in the chest is a pendulum and they lock the item in. ending
                 if (itemInChest == PENDULUM) {
                     chestClosed  = true;
                     gameFinished = true;

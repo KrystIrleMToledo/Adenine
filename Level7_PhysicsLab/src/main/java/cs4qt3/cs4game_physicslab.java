@@ -68,7 +68,21 @@ public class cs4game_physicslab implements KeyListener{
     int completion = 0;
     boolean openLockerRevealed = false;
     static final int OPEN_LOCKER_POS = 15;
-    cs4backroom backroomRef = null; 
+    cs4backroom backroomRef = null;
+    private String playerType = "boy";
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
     private boolean collision(int targetPos) {
         if (targetPos < 0 || targetPos >= mapLayout.length) return false;
         int tile = mapLayout[targetPos];
@@ -144,6 +158,7 @@ public class cs4game_physicslab implements KeyListener{
     };
     static final int[] ANS_GRAVITY = {3, 1, 2, 1, 1};
     public cs4game_physicslab(){
+        loadPlayerType();
         frame=new JFrame();
         enemyTiles = new boolean[mapWidth * mapHeight];
         String[] tileNames = {
@@ -171,17 +186,14 @@ public class cs4game_physicslab implements KeyListener{
         door = tileIcons[11];
         window = tileIcons[12];
         playerSprites = new HashMap<>();
-        String[] spriteNames = {
-            "girl01", "girl02", "girl03", "girl04", "girl05", "girl06", "girl07", 
-            "girl08", "girl09", "girl10", "girl11", "girl12", "enemy"
-        };
-        for (String name : spriteNames) {
-            if (name.equals("enemy")) {
-                playerSprites.put(name, loadAndScale("physicslabtiles/" + name + ".png", 1300/mapWidth, 2000/mapHeight));
-            } else {
-                playerSprites.put(name, loadAndScale("physicslabtiles/" + name + ".png", frameWidth/mapWidth, frameHeight/mapHeight));
-            }
-        } 
+        String prefix = playerType.equals("girl") ? "girl" : "boy";
+        String[] spriteNums = {"01","02","03","04","05","06","07","08","09","10","11","12"};
+        for (String num : spriteNums) {
+            String key = "girl" + num; // internal key stays the same for compatibility
+            String file = prefix + num;
+            playerSprites.put(key, loadAndScale("physicslabtiles/" + file + ".png", (int)(frameWidth/mapWidth * 0.8), (int)(frameHeight/mapHeight * 0.8)));
+        }
+        playerSprites.put("enemy", loadAndScale("physicslabtiles/enemy.png", 1300/mapWidth, 2000/mapHeight));
         playerMap = new JLabel[mapHeight*mapWidth];
         playerStarting = new int[]{
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
