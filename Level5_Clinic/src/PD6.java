@@ -116,6 +116,7 @@ public class PD6 implements KeyListener {
             String stats = String.format("\nTime: %.2fs\nBest: %.2fs\nTotal Attempts: %d", 
                             timeTaken, fastestTime, totalAttempts);
             JOptionPane.showMessageDialog(frame, "Kit Found!" + stats);
+            new csLabMapG3().gr6();
         }
     }
 
