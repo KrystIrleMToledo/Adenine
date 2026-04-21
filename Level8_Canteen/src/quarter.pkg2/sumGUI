@@ -7,6 +7,9 @@ package quarter.pkg2;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class sumGUI implements KeyListener, MouseListener, ActionListener {
     class InvalidKeyException extends Exception {
@@ -16,7 +19,8 @@ public class sumGUI implements KeyListener, MouseListener, ActionListener {
     }
     JFrame frame;
     ImageIcon floorTile, chair, table, playerIcon, playerIcon2, NPCIcon;
-    ImageIcon playerIconfront, playerIconfront2, playerIconback, playerIconback2, playerIconleft, playerIconright;
+    ImageIcon playerIconfront, playerIconfront2, playerIconback, playerIconback2;
+    ImageIcon playerIconleft, playerIconright, playerIconleft2, playerIconright2;
     ImageIcon doorLocked, doorOpen; // NEW: Door images
    
     JLabel tiles[];
@@ -52,8 +56,24 @@ public class sumGUI implements KeyListener, MouseListener, ActionListener {
     boolean quizActive = false;
     boolean doorUnlocked = false; // NEW: Door state
     boolean gameWon = false; // NEW: Game state
+    String playerType = "boy";
+    
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
    
     public sumGUI() {
+        loadPlayerType();
         characterPosition = -1;
         characterMode = 0;
         NPCLocation = -1;
@@ -98,15 +118,92 @@ public class sumGUI implements KeyListener, MouseListener, ActionListener {
         // NEW: Door images (use existing images or create these)
         doorLocked = new ImageIcon(new ImageIcon("Images/door_locked.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
         doorOpen = new ImageIcon(new ImageIcon("Images/door_open.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-       
-        // Player animations
-        playerIconfront = new ImageIcon(new ImageIcon("Images/boyidle1.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconfront2 = new ImageIcon(new ImageIcon("Images/boywalk1.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconback = new ImageIcon(new ImageIcon("Images/boywalk6.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconback2 = new ImageIcon(new ImageIcon("Images/boywalk5.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconright = new ImageIcon(new ImageIcon("Images/boywalk3.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIconleft = new ImageIcon(new ImageIcon("Images/boywalk4.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
-        playerIcon = playerIconfront;
+       // Player animations based on type
+        if (playerType.equals("girl")) {
+
+            playerIconfront = playerIcon = new ImageIcon(
+                new ImageIcon("Images/gplayer1.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconfront2 = new ImageIcon(
+                new ImageIcon("Images/gplayer2.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback = new ImageIcon(
+                new ImageIcon("Images/gplayer3.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback2 = new ImageIcon(
+                new ImageIcon("Images/gplayer9.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright = new ImageIcon(
+                new ImageIcon("Images/gplayer5.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft = new ImageIcon(
+                new ImageIcon("Images/gplayer6.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright2 = new ImageIcon(
+                new ImageIcon("Images/gplayer7.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft2 = new ImageIcon(
+                new ImageIcon("Images/gplayer8.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+        } else {
+
+            playerIconfront = playerIcon = new ImageIcon(
+                new ImageIcon("Images/player1.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconfront2 = new ImageIcon(
+                new ImageIcon("Images/player2.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback = new ImageIcon(
+                new ImageIcon("Images/player3.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback2 = new ImageIcon(
+                new ImageIcon("Images/player9.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright = new ImageIcon(
+                new ImageIcon("Images/player5.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft = new ImageIcon(
+                new ImageIcon("Images/player6.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright2 = new ImageIcon(
+                new ImageIcon("Images/player7.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft2 = new ImageIcon(
+                new ImageIcon("Images/player8.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+        }
+
         playerIcon2 = playerIconfront2;
        
         NPCIcon = new ImageIcon(new ImageIcon("Images/boy1.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
