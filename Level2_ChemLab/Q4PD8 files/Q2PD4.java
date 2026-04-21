@@ -4,7 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import java.util.*;
@@ -26,7 +28,6 @@ public class Q2PD4 extends JPanel {
     private ImageIcon obj6_VerticalTable_Top, obj7_VerticalTable_Bottom, potionIcon;
     private ImageIcon objA_CT1_L, objB_CT1_R, objA_CT2_L, objB_CT2_R, objA_CT3_L, objB_CT3_R;
     private ImageIcon boyidlefront, boyidleback;
-    
     private Map<Integer, List<ImageIcon>> directionalFrames;
     private int currentDirection = KeyEvent.VK_DOWN;
     private int currentFrameIndex = 0;
@@ -54,6 +55,22 @@ public class Q2PD4 extends JPanel {
     private final Set<Integer> wallTiles = Set.of(1, 3, 5, 8, 9, 4, 6, 7, 10, 11, 12, 13, 14, 15); 
     private final Set<Integer> collectibleIds = Set.of(10, 12, 14);
 
+    String playerType = ""; // default
+    
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
+
     private final int[][] initialMapConfig = {
         {1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 
         {1, 2, 2, 3, 5, 2, 3, 5, 16, 3, 5, 1}, 
@@ -69,9 +86,10 @@ public class Q2PD4 extends JPanel {
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1} 
     };
 
+    // 3. Update Constructor to accept (PD8 window)
     public Q2PD4(PD8 window) {
         this.window = window;
-        this.setLayout(new BorderLayout()); 
+        this.setLayout(new BorderLayout()); // Set layout for the panel
         
         tileMap = new JLabel[mapHeight][mapWidth];
         currentMapConfig = copyMap(initialMapConfig);
@@ -81,7 +99,7 @@ public class Q2PD4 extends JPanel {
         
         loadAssets();
         
-       
+        // Build the grid inside this panel instead of a separate frame
         JPanel p = new JPanel(new GridLayout(mapHeight, mapWidth));
         initializeMapDisplay(p);
         
@@ -90,8 +108,8 @@ public class Q2PD4 extends JPanel {
         
         startTimer();
         setupLuckTimer();
-
-
+;
+        // Key listeners now attach to "this" panel
         this.setFocusable(true);
         this.addKeyListener(new KeyAdapter() {
             @Override
@@ -101,7 +119,7 @@ public class Q2PD4 extends JPanel {
         });
     }
 
-
+    // 4. Added this method so the PD8 controller can access the panel 
     public JPanel getMainPanel() {
         return this;
     }
@@ -135,14 +153,27 @@ public class Q2PD4 extends JPanel {
         objB_CT3_R = loadTransparentIcon("PD4_assets/37.png");
         potionIcon = loadTransparentIcon("PD4_assets/2.png"); 
 
-        boyidlefront = loadTransparentIcon("PD4_assets/boyidlefront.png");
-        boyidleback = loadTransparentIcon("PD4_assets/boyidleback.png");
-
+        
+        loadPlayerType();
+        System.out.println(playerType);
         directionalFrames = new HashMap<>();
-        directionalFrames.put(KeyEvent.VK_DOWN, loadSeq("boywalkfront1", "boywalkfront2"));
-        directionalFrames.put(KeyEvent.VK_UP, loadSeq("boywalkbehind1", "boywalkbehind2"));
-        directionalFrames.put(KeyEvent.VK_LEFT, loadSeq("leftfrontprof", "leftbackprof"));
-        directionalFrames.put(KeyEvent.VK_RIGHT, loadSeq("rightfrontprof", "rightbackprof"));
+        if (playerType.equals("girl")) {
+            boyidlefront = loadTransparentIcon("PD8_assets/girlidle1.png");
+            boyidleback = loadTransparentIcon("PD8_assets/girlidle2.png");
+            directionalFrames.put(KeyEvent.VK_DOWN, loadSeq("girlwalk1", "girlidle1", "girlwalk2"));
+            directionalFrames.put(KeyEvent.VK_UP, loadSeq("girlwalk3", "girlidle2", "girlwalk4"));
+            directionalFrames.put(KeyEvent.VK_LEFT, loadSeq("girlwalk6", "girlidle3", "girlidle8"));
+            directionalFrames.put(KeyEvent.VK_RIGHT, loadSeq("girlwalk5", "girlidle4", "girlwalk7"));
+        }
+        else {
+            boyidlefront = loadTransparentIcon("PD4_assets/boyidle1.png");
+            boyidleback = loadTransparentIcon("PD4_assets/boyidle4.png");
+            directionalFrames.put(KeyEvent.VK_DOWN, loadSeq("boywalk1", "boyidle1", "boywalk2"));
+            directionalFrames.put(KeyEvent.VK_UP, loadSeq("boywalk5", "boyidle4", "boywalk6"));
+            directionalFrames.put(KeyEvent.VK_LEFT, loadSeq("boywalk4", "boyidle2", "boyidle8"));
+            directionalFrames.put(KeyEvent.VK_RIGHT, loadSeq("boywalk3", "boyidle3", "boywalk7"));
+        }
+        
     }
 
     private List<ImageIcon> loadSeq(String... names) {
@@ -215,6 +246,7 @@ public class Q2PD4 extends JPanel {
         if (nx >= 0 && nx < mapWidth && ny >= 0 && ny < mapHeight) {
             int targetId = currentMapConfig[ny][nx];
 
+            // Trigger Map Change [cite: 96-103, 107]
             if (nx == 9 && ny == 11 && totalReported >= TOTAL_GOAL) {
                 tileMap[playerY][playerX].setIcon(getIconForId(currentMapConfig[playerY][playerX]));
                 playerX = nx; playerY = ny;
