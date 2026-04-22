@@ -1,4 +1,4 @@
-package Q2;
+package PD8TOTAL;
 
 // Paller
 // Daned
@@ -10,9 +10,12 @@ package Q2;
 // 4. Defeat the Snake to collect its eye and exit the cave
 
 
+import java.io.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.Timer;
+ 
 
 public class GroupPD6 implements KeyListener, ActionListener{
     
@@ -107,6 +110,8 @@ public class GroupPD6 implements KeyListener, ActionListener{
     int wincon = 0;
     int cht = 0;
     int bct = 0;
+    boolean finished = false;
+    boolean gamewon = false;
     
     JLabel chatBox;
     JLabel chatText;
@@ -138,7 +143,7 @@ public class GroupPD6 implements KeyListener, ActionListener{
         return playerIcon1; // fallback
     }
     int c;
-
+    int ph;
 
 
     
@@ -148,9 +153,48 @@ public class GroupPD6 implements KeyListener, ActionListener{
     int viewIndex(int x, int y) {
         return y * viewWidth + x;
     }
+    
+    String playerType = "";
+    private void loadPlayerHealth() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("phealth.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                ph = Integer.parseInt(line);
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("Text not found, going 200");
+            ph = 200;
+        }
+    }
+    
+    private void writePlayerHealth() {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("phealth.txt"));
+            bw.write("200");
+            bw.close();
+        } catch (IOException e) {
+            System.out.println("Can't locate file");
+        }
+    }
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
 
 
     public GroupPD6() {
+        writePlayerHealth();
         chatBox=new JLabel();
         chatText=new JLabel("Hello wanderer");
         nextB=new JButton("Next");
@@ -161,42 +205,65 @@ public class GroupPD6 implements KeyListener, ActionListener{
         charY=-1;
         characterMode=0;
         
-        tile1 = new ImageIcon("Images1/tile1.png");
-        bridge = new ImageIcon("Images1/bridge.png");
-        bridge2 = new ImageIcon("Images1/bridge2.png");
-        bridge3 = new ImageIcon("Images1/bridge3.png");
-        bridge4 = new ImageIcon("Images1/bridge4.png");
-        bridge5 = new ImageIcon("Images1/bridge5.png");
-        bridge6 = new ImageIcon("Images1/bridge6.png");
-        bridge7 = new ImageIcon("Images1/bridge7.png");
-        bridge8 = new ImageIcon("Images1/bridge8.png");
-        mountain = new ImageIcon("Images1/mountain.png");
-        rocks = new ImageIcon("Images1/rocks.png");
-        fence = new ImageIcon("Images1/fence.png");
+        tile1 = new ImageIcon("Images/gr9/PD6/tile1.png");
+        bridge = new ImageIcon("Images/gr9/PD6/bridge.png");
+        bridge2 = new ImageIcon("Images/gr9/PD6/bridge2.png");
+        bridge3 = new ImageIcon("Images/gr9/PD6/bridge3.png");
+        bridge4 = new ImageIcon("Images/gr9/PD6/bridge4.png");
+        bridge5 = new ImageIcon("Images/gr9/PD6/bridge5.png");
+        bridge6 = new ImageIcon("Images/gr9/PD6/bridge6.png");
+        bridge7 = new ImageIcon("Images/gr9/PD6/bridge7.png");
+        bridge8 = new ImageIcon("Images/gr9/PD6/bridge8.png");
+        mountain = new ImageIcon("Images/gr9/PD6/mountain.png");
+        rocks = new ImageIcon("Images/gr9/PD6/rocks.png");
+        fence = new ImageIcon("Images/gr9/PD6/fence.png");
         
-        //downwards animation
-        playerIcon1=new ImageIcon("Images1/boyidle1.png");
-        playerIcon2=new ImageIcon("Images1/boywalk1.png");
-        playerIcon3=new ImageIcon("Images1/boywalk2.png");
+        loadPlayerType();
+        if (playerType.equals("girl")) {
+            //downwards animation
+            playerIcon1=new ImageIcon("Images/gr9/girlidle1.png");
+            playerIcon2=new ImageIcon("Images/gr9/girlwalk1.png");
+            playerIcon3=new ImageIcon("Images/gr9/girlwalk2.png");
+
+            //left animation
+            playerIcon4=new ImageIcon("Images/gr9/girlidle2.png");
+            playerIcon5=new ImageIcon("Images/gr9/girlwalk4.png");
+            playerIcon6=new ImageIcon("Images/gr9/girlwalk8.png");
+
+            //right animation
+            playerIcon7=new ImageIcon("Images/gr9/girlidle3.png");
+            playerIcon8=new ImageIcon("Images/gr9/girlwalk3.png");
+            playerIcon9=new ImageIcon("Images/gr9/girlwalk7.png");
+
+            //upwards animation
+            playerIcon10=new ImageIcon("Images/gr9/girlidle4.png");
+            playerIcon11=new ImageIcon("Images/gr9/girlwalk5.png");
+            playerIcon12=new ImageIcon("Images/gr9/girlwalk6.png");
+        } else {
+            //downwards animation
+            playerIcon1=new ImageIcon("Images/gr9/boyidle1.png");
+            playerIcon2=new ImageIcon("Images/gr9/boywalk1.png");
+            playerIcon3=new ImageIcon("Images/gr9/boywalk2.png");
+
+            //left animation
+            playerIcon4=new ImageIcon("Images/gr9/boyidle2.png");
+            playerIcon5=new ImageIcon("Images/gr9/boywalk4.png");
+            playerIcon6=new ImageIcon("Images/gr9/boywalk8.png");
+
+            //right animation
+            playerIcon7=new ImageIcon("Images/gr9/boyidle3.png");
+            playerIcon8=new ImageIcon("Images/gr9/boywalk3.png");
+            playerIcon9=new ImageIcon("Images/gr9/boywalk7.png");
+
+            //upwards animation
+            playerIcon10=new ImageIcon("Images/gr9/boyidle4.png");
+            playerIcon11=new ImageIcon("Images/gr9/boywalk5.png");
+            playerIcon12=new ImageIcon("Images/gr9/boywalk6.png");
+        }
         
-        //left animation
-        playerIcon4=new ImageIcon("Images1/boyidle2.png");
-        playerIcon5=new ImageIcon("Images1/boywalk4.png");
-        playerIcon6=new ImageIcon("Images1/boywalk8.png");
-        
-        //right animation
-        playerIcon7=new ImageIcon("Images1/boyidle3.png");
-        playerIcon8=new ImageIcon("Images1/boywalk3.png");
-        playerIcon9=new ImageIcon("Images1/boywalk7.png");
-        
-        //upwards animation
-        playerIcon10=new ImageIcon("Images1/boyidle4.png");
-        playerIcon11=new ImageIcon("Images1/boywalk5.png");
-        playerIcon12=new ImageIcon("Images/boywalk6.png");
-        
-        snake1=new ImageIcon("Images1/snake1.png");
-        snake2=new ImageIcon("Images1/snake2.png");
-        oldman=new ImageIcon("Images1/oldman.png");
+        snake1=new ImageIcon("Images/gr9/PD6/snake1.png");
+        snake2=new ImageIcon("Images/gr9/PD6/snake2.png");
+        oldman=new ImageIcon("Images/gr9/PD6/oldman.png");
         
         playerIcon1=new ImageIcon(playerIcon1.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
         playerIcon2=new ImageIcon(playerIcon2.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
@@ -514,6 +581,7 @@ public class GroupPD6 implements KeyListener, ActionListener{
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setResizable(false);
         frame.setVisible(true);
+        frame.requestFocusInWindow();
         frame.addKeyListener(this);
         
         exitB.addActionListener(this);
@@ -646,17 +714,30 @@ public class GroupPD6 implements KeyListener, ActionListener{
             }
         }
     }
+    
+    public boolean isBlocked(int x, int y) {
+        int index = worldIndex(x, y);
+        return world[index] == SNAKE || world[index] == OLDMAN || world[index] == PORTAL
+                 || world[index] == MOUNTAIN || world[index] == BRIDGE || world[index] == BRIDGE2 || world[index] == BRIDGE3 || world[index] == BRIDGE4
+                 || world[index] == BRIDGE5 || world[index] == BRIDGE6 || world[index] == BRIDGE7 || world[index] == BRIDGE8 || world[index] == ROCKS || world[index] == FENCE;
+    }
+    
+    public boolean GroupPD6Connect() {
+        SwingUtilities.invokeLater(this::MainCodeBlock);
 
+        while (!finished) {
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException ignored) {}
+        }
+
+        return gamewon;
+    }
+    
 
     public static void main(String[] args) {
         GroupPD6 yes = new GroupPD6();
         yes.MainCodeBlock();
-    }
-    public boolean isBlocked(int x, int y) {
-        int index = worldIndex(x, y);
-        return world[index] == SNAKE || world[index] == OLDMAN || world[index] == PORTAL || world[index] == ROCKS || world[index] == FENCE
-                 || world[index] == MOUNTAIN || world[index] == BRIDGE || world[index] == BRIDGE2 || world[index] == BRIDGE3 || world[index] == BRIDGE4
-                 || world[index] == BRIDGE5 || world[index] == BRIDGE6 || world[index] == BRIDGE7 || world[index] == BRIDGE8;
     }
 
 
@@ -1121,8 +1202,8 @@ public class GroupPD6 implements KeyListener, ActionListener{
             if(e.getKeyCode() == KeyEvent.VK_K){
                 if(snakess == 1) {
                     new Thread(() -> {
-                        boolean won = new battleMockUp().startBattleAndWait();
-
+                        boolean won = new battleMockUp1().startBattleAndWait1();
+                        System.out.print(gamewon);
                         if (won) {
                             JOptionPane.showMessageDialog(frame, "You won! Speak to the old man to exit!", "Information", JOptionPane.INFORMATION_MESSAGE);
                             wincon++;
@@ -1130,7 +1211,15 @@ public class GroupPD6 implements KeyListener, ActionListener{
                         } else {
                             JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
                             JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            finished = true;
+                            gamewon = false; // or false
                             frame.dispose();
+                            frame.dispose();
+                            frame.dispose(); // close current game
+
+                            SwingUtilities.invokeLater(() -> {
+                                new GroupPD().MainCodeBlock(); // start fresh game
+                            });
                         }
                     }).start();
                 }
@@ -1190,6 +1279,9 @@ public class GroupPD6 implements KeyListener, ActionListener{
                     chatText.setText("I'll help you out of this cave, come with me.");
                     bct++;
                 } else if (bct == 3) {
+                    finished = true;
+                    gamewon = true; // or false
+                    frame.dispose();
                     frame.dispose();
                 }
             }
