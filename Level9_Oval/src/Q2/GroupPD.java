@@ -1,4 +1,4 @@
-package Q2;
+package PD8TOTAL;
 
 // Paller
 // Daned
@@ -6,18 +6,13 @@ package Q2;
 
 
 
+import java.io.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.Timer;
 
-public class GroupPD implements KeyListener{
-    
-    class InvalidMovementKeyException extends Exception {
-        public InvalidMovementKeyException(String message) {
-            super(message);
-        }
-    }
-    
+public class GroupPD implements KeyListener, ActionListener{
     JFrame frame;
     ImageIcon playerIcon1;
     ImageIcon playerIcon2;
@@ -39,6 +34,7 @@ public class GroupPD implements KeyListener{
     ImageIcon snake2;
     ImageIcon portal1;
     ImageIcon portal2;
+    ImageIcon cave;
     int charPlace[];
     int mapLayout[];
     int mapWidth=12;
@@ -46,6 +42,9 @@ public class GroupPD implements KeyListener{
     int frameWidth=1050;
     int frameHeight=1050;
     int charac;
+    int cht = 0;
+    int bct = 0;
+    int cct = 0;
     int charX;
     int charY;
     int characterMode;
@@ -64,7 +63,7 @@ public class GroupPD implements KeyListener{
     int playerY = 6;         // world row
     int tempX = 0;
     int tempY = 0;
-    int keyc = 6;
+    int keyc = 0;
     int tree1n = 0;
     int tree2n = 0;
     int tree3n = 0;
@@ -76,7 +75,7 @@ public class GroupPD implements KeyListener{
     int GRASS = 0;
     int TREE = 1;
     int FLOWER = 2;
-    int SNAKE = 3;
+    int CAVE = 3;
     int OLDMAN = 4;
     int PORTAL = 5;
     int snakess = 0;
@@ -85,6 +84,13 @@ public class GroupPD implements KeyListener{
     int animFrame = 0; // 0=idle, 1=walk1, 2=walk2
     int walkStep = 0;
     int wincon = 0;
+    
+    boolean inCave = false;
+    
+    JLabel chatBox;
+    JLabel chatText;
+    JButton nextB;
+    JButton exitB;
     
     ImageIcon getPlayerFrame() {
     switch (direction) {
@@ -111,49 +117,122 @@ public class GroupPD implements KeyListener{
         return playerIcon1; // fallback
     }
     int c;
+    int ph;
 
+    String playerType = "";
+    
     int worldIndex(int x, int y) {
         return y * worldWidth + x;
     }
     int viewIndex(int x, int y) {
         return y * viewWidth + x;
     }
+    private void loadPlayerHealth() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("phealth.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                ph = Integer.parseInt(line);
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("Text not found, going 200");
+            ph = 200;
+        }
+    }
+    
+    private void writePlayerHealth() {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("phealth.txt"));
+            bw.write("200");
+            bw.close();
+        } catch (IOException e) {
+            System.out.println("Can't locate file");
+        }
+    }
+    
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
+
 
     public GroupPD() {
+        writePlayerHealth();
+        
+        chatBox=new JLabel();
+        chatText=new JLabel("Hello wanderer");
+        nextB=new JButton("Who are you?");
+        exitB=new JButton("Exit");
+        
         frame = new JFrame();
         charX=-1;
         charY=-1;
         characterMode=0;
         
-        tile1 = new ImageIcon("Images/tile1.png");
-        tree1 = new ImageIcon("Images/tree1.png");
-        flower1 = new ImageIcon("Images/tree2.png");
+        tile1 = new ImageIcon("Images/gr9/tile1.png");
+        tree1 = new ImageIcon("Images/gr9/tree1.png");
+        flower1 = new ImageIcon("Images/gr9/tree2.png");
         
-        //downwards animation
-        playerIcon1=new ImageIcon("Images/boyidle1.png");
-        playerIcon2=new ImageIcon("Images/boywalk1.png");
-        playerIcon3=new ImageIcon("Images/boywalk2.png");
+        loadPlayerType();
+        if (playerType.equals("girl")) {
+            //downwards animation
+            playerIcon1=new ImageIcon("Images/gr9/girlidle1.png");
+            playerIcon2=new ImageIcon("Images/gr9/girlwalk1.png");
+            playerIcon3=new ImageIcon("Images/gr9/girlwalk2.png");
+
+            //left animation
+            playerIcon4=new ImageIcon("Images/gr9/girlidle2.png");
+            playerIcon5=new ImageIcon("Images/gr9/girlwalk4.png");
+            playerIcon6=new ImageIcon("Images/gr9/girlwalk8.png");
+
+            //right animation
+            playerIcon7=new ImageIcon("Images/gr9/girlidle3.png");
+            playerIcon8=new ImageIcon("Images/gr9/girlwalk3.png");
+            playerIcon9=new ImageIcon("Images/gr9/girlwalk7.png");
+
+            //upwards animation
+            playerIcon10=new ImageIcon("Images/gr9/girlidle4.png");
+            playerIcon11=new ImageIcon("Images/gr9/girlwalk5.png");
+            playerIcon12=new ImageIcon("Images/gr9/girlwalk6.png");
+        } else {
+            //downwards animation
+            playerIcon1=new ImageIcon("Images/gr9/boyidle1.png");
+            playerIcon2=new ImageIcon("Images/gr9/boywalk1.png");
+            playerIcon3=new ImageIcon("Images/gr9/boywalk2.png");
+
+            //left animation
+            playerIcon4=new ImageIcon("Images/gr9/boyidle2.png");
+            playerIcon5=new ImageIcon("Images/gr9/boywalk4.png");
+            playerIcon6=new ImageIcon("Images/gr9/boywalk8.png");
+
+            //right animation
+            playerIcon7=new ImageIcon("Images/gr9/boyidle3.png");
+            playerIcon8=new ImageIcon("Images/gr9/boywalk3.png");
+            playerIcon9=new ImageIcon("Images/gr9/boywalk7.png");
+
+            //upwards animation
+            playerIcon10=new ImageIcon("Images/gr9/boyidle4.png");
+            playerIcon11=new ImageIcon("Images/gr9/boywalk5.png");
+            playerIcon12=new ImageIcon("Images/gr9/boywalk6.png");
+        }
         
-        //left animation
-        playerIcon4=new ImageIcon("Images/boyidle2.png");
-        playerIcon5=new ImageIcon("Images/boywalk4.png");
-        playerIcon6=new ImageIcon("Images/boywalk8.png");
         
-        //right animation
-        playerIcon7=new ImageIcon("Images/boyidle3.png");
-        playerIcon8=new ImageIcon("Images/boywalk3.png");
-        playerIcon9=new ImageIcon("Images/boywalk7.png");
-        
-        //upwards animation
-        playerIcon10=new ImageIcon("Images/boyidle4.png");
-        playerIcon11=new ImageIcon("Images/boywalk5.png");
-        playerIcon12=new ImageIcon("Images/boywalk6.png");
-        
-        snake1=new ImageIcon("Images/snake1.png");
-        snake2=new ImageIcon("Images/snake2.png");
-        oldman=new ImageIcon("Images/oldman.png");
-        portal1=new ImageIcon("Images/portal1.png");
-        portal2=new ImageIcon("Images/portal2.png");
+        snake1=new ImageIcon("Images/gr9/snake1.png");
+        snake2=new ImageIcon("Images/gr9/snake2.png");
+        oldman=new ImageIcon("Images/gr9/oldman.png");
+        portal1=new ImageIcon("Images/gr9/portal1.png");
+        portal2=new ImageIcon("Images/gr9/portal2.png");
+        cave=new ImageIcon("Images/gr9/cave.png");
         
         playerIcon1=new ImageIcon(playerIcon1.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
         playerIcon2=new ImageIcon(playerIcon2.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
@@ -176,136 +255,131 @@ public class GroupPD implements KeyListener{
         oldman = new ImageIcon(oldman.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
         portal1 = new ImageIcon(portal1.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
         portal2 = new ImageIcon(portal2.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        cave = new ImageIcon(cave.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
         
-        try {
-            for (int i = 0; i < world.length; i++) {
-                world[i] = 0;
-            }
-            world[worldIndex(6, 3)] = 4;
-            world[worldIndex(7, 3)] = 5;
-            world[worldIndex(3, 5)] = 1;
-            world[worldIndex(6, 9)] = 1;
-            world[worldIndex(8, 4)] = 1;
-            world[worldIndex(5, 6)] = 1;
-            world[worldIndex(11, 11)] = 1;
-
-            world[worldIndex(35, 5)] = 1;
-            world[worldIndex(26, 7)] = 1;
-            world[worldIndex(30, 11)] = 1;
-            world[worldIndex(28, 4)] = 1;
-            world[worldIndex(32, 0)] = 1;
-
-            world[worldIndex(13, 5)] = 1;
-            world[worldIndex(15, 7)] = 1;
-            world[worldIndex(20, 11)] = 1;
-            world[worldIndex(24, 4)] = 1;
-            world[worldIndex(22, 0)] = 1;
-
-            world[worldIndex(0, 33)] = 1;
-            world[worldIndex(7, 35)] = 1;
-            world[worldIndex(5, 26)] = 1;
-            world[worldIndex(9, 28)] = 1;
-            world[worldIndex(11, 30)] = 1;
-
-            world[worldIndex(33, 33)] = 1;
-            world[worldIndex(26, 35)] = 1;
-            world[worldIndex(30, 26)] = 1;
-            world[worldIndex(35, 28)] = 1;
-            world[worldIndex(28, 30)] = 1;
-
-            world[worldIndex(13, 35)] = 1;
-            world[worldIndex(15, 33)] = 1;
-            world[worldIndex(20, 28)] = 1;
-            world[worldIndex(24, 26)] = 1;
-            world[worldIndex(22, 30)] = 1;
-
-            world[worldIndex(3, 25)] = 1;
-            world[worldIndex(6, 20)] = 1;
-            world[worldIndex(8, 16)] = 1;
-            world[worldIndex(5, 14)] = 1;
-            world[worldIndex(11, 23)] = 1;
-
-            world[worldIndex(33, 23)] = 1;
-            world[worldIndex(26, 20)] = 1;
-            world[worldIndex(30, 14)] = 1;
-            world[worldIndex(50, 17)] = 1;
-            world[worldIndex(28, 13)] = 1;
-
-            world[worldIndex(22, 23)] = 1;
-            world[worldIndex(24, 18)] = 1;
-            world[worldIndex(14, 14)] = 1;
-            world[worldIndex(17, 17)] = 1;
-            world[worldIndex(18, 18)] = 3;
-            world[worldIndex(16, 13)] = 1;
-
+        for (int i = 0; i < world.length; i++) {
+            world[i] = 0;
         }
-        catch (ArrayIndexOutOfBoundsException ex) {
-            JOptionPane.showMessageDialog(frame,"Tile placed outside world bounds.","Array Error",JOptionPane.ERROR_MESSAGE);
-        }
+
+        // First chunk (A chunk is 12x12 btw)(Top-left corner)
+        world[worldIndex(6, 3)] = 4;
+        world[worldIndex(7, 3)] = 5;
+        world[worldIndex(3, 5)] = 1;
+        world[worldIndex(6, 9)] = 1; //
+        world[worldIndex(8, 4)] = 1;
+        world[worldIndex(5, 6)] = 1;
+        world[worldIndex(11, 11)] = 1;
         
-        try {
-            character=new JLabel[mapWidth*mapHeight];
-            charPlace=new int[]{
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,1,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0
-            };
-            if(charPlace.length != mapWidth * mapHeight){
-                throw new ArrayIndexOutOfBoundsException("Map size is incorrect");
-            }
-            for(int i=0;i<character.length;i++){
-                if(charPlace[i]==1){
-                    character[i]=new JLabel(playerIcon1);
-                    charac=i;
-                }
-                else character[i]=new JLabel();
-            }
-        }
-        catch(ArrayIndexOutOfBoundsException ex) {
-            JOptionPane.showMessageDialog(frame,"Map size for character is incorrect","Error",JOptionPane.ERROR_MESSAGE);
-        }
+        //Second chunk (Top-right corner)
+        world[worldIndex(35, 5)] = 1;
+        world[worldIndex(26, 7)] = 1; //
+        world[worldIndex(30, 11)] = 1;
+        world[worldIndex(28, 4)] = 1;
+        world[worldIndex(32, 0)] = 1;
+
+        //Third chunk (Top-middle)
+        world[worldIndex(13, 5)] = 1;
+        world[worldIndex(15, 7)] = 1;
+        world[worldIndex(20, 11)] = 1;
+        world[worldIndex(24, 4)] = 1;
+        world[worldIndex(22, 0)] = 1;
         
+        //Fourth chunk (Bottom-left corner)
+        world[worldIndex(0, 33)] = 1;
+        world[worldIndex(7, 35)] = 1; //
+        world[worldIndex(5, 26)] = 1;
+        world[worldIndex(9, 28)] = 1;
+        world[worldIndex(11, 30)] = 1;
         
-        try{
-            tiles=new JLabel[mapWidth*mapHeight];
-            mapLayout=new int[]{
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,0,0
-            };
-            if(mapLayout.length != mapWidth * mapHeight){
-                throw new ArrayIndexOutOfBoundsException("Map size is incorrect");
+        //Fitth chunk (Bottom-right corner)
+        world[worldIndex(33, 33)] = 1; //
+        world[worldIndex(26, 35)] = 1;
+        world[worldIndex(30, 26)] = 1;
+        world[worldIndex(35, 28)] = 1;
+        world[worldIndex(28, 30)] = 1;
+        
+        //Sixth chunk (Bottom-middle corner)
+        world[worldIndex(13, 35)] = 1;
+        world[worldIndex(15, 33)] = 1;
+        world[worldIndex(20, 28)] = 1;
+        world[worldIndex(24, 26)] = 1; //
+        world[worldIndex(22, 30)] = 1;
+        
+        //SIX-Seventh chunk (Middle-left corner)
+        world[worldIndex(3, 25)] = 1;
+        world[worldIndex(6, 20)] = 1;//
+        world[worldIndex(8, 16)] = 1;
+        world[worldIndex(5, 14)] = 1;
+        world[worldIndex(11, 23)] = 1;
+        
+        //Eighth chunk (Middle-right corner)
+        world[worldIndex(33, 23)] = 1;
+        world[worldIndex(26, 20)] = 1; //
+        world[worldIndex(30, 14)] = 1;
+        world[worldIndex(35, 17)] = 1;
+        world[worldIndex(28, 13)] = 1;
+        
+        //Ninthc chunk (Middle-middle corner)
+        world[worldIndex(22, 23)] = 1;
+        world[worldIndex(24, 18)] = 1;
+        world[worldIndex(14, 14)] = 1;
+        world[worldIndex(17, 17)] = 1; //
+        world[worldIndex(18, 18)] = 3;
+        world[worldIndex(16, 13)] = 1;
+        
+        character=new JLabel[mapWidth*mapHeight];
+        charPlace=new int[]{
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,1,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+        };
+        for(int i=0;i<character.length;i++){
+            if(charPlace[i]==1){
+                character[i]=new JLabel(playerIcon1);
+                charac=i;
             }
-            for(int i=0;i<tiles.length;i++){
-                if(mapLayout[i]==0) tiles[i]=new JLabel(tile1);
-            }
+            else character[i]=new JLabel();
         }
-        catch(ArrayIndexOutOfBoundsException ex) {
-            JOptionPane.showMessageDialog(frame,"Map size for character is incorrect","Error",JOptionPane.ERROR_MESSAGE);
+
+        tiles=new JLabel[mapWidth*mapHeight];
+        mapLayout=new int[]{
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,
+        };
+        for(int i=0;i<tiles.length;i++){
+            if(mapLayout[i]==0) tiles[i]=new JLabel(tile1);
         }
 
 
     }
     public void MainCodeBlock() {
         frame.setLayout(new GraphPaperLayout(new Dimension(mapWidth, mapHeight)));
+        
+        frame.add(chatText, new Rectangle(1,8,7,1));
+        frame.add(nextB, new Rectangle(10,9,2,1));
+        frame.add(exitB, new Rectangle(8,9,2,1));
+        frame.add(chatBox, new Rectangle(0,7,12,4));
+        chatBox.setOpaque(true);
+        chatBox.setBackground(Color.white);
 
         int x=0, y=0, w=1, h=1;
         for(int i=0;i<character.length;i++){
@@ -330,10 +404,22 @@ public class GroupPD implements KeyListener{
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setResizable(false);
         frame.setVisible(true);
+        frame.requestFocusInWindow();
         frame.addKeyListener(this);
+        
+        exitB.addActionListener(this);
+        nextB.addActionListener(this);
+        setChatVisible(false);
         
         render(snakess, portall);
         
+    }
+    
+    public void setChatVisible(boolean b){
+        chatBox.setVisible(b);
+        chatText.setVisible(b);
+        nextB.setVisible(b);
+        exitB.setVisible(b);
     }
     
     public void movePlayer(int dx, int dy) {
@@ -414,12 +500,7 @@ public class GroupPD implements KeyListener{
             } else if (world[wIndex] == 2) {
                 tiles[vIndex].setIcon(flower1);   // hive tree
             } else if (world[wIndex] == 3) {
-                if (snakep == 0) {
-                    tiles[vIndex].setIcon(snake1);   // snake stone
-                }
-                else {
-                    tiles[vIndex].setIcon(snake2);   // snake
-                }
+                tiles[vIndex].setIcon(cave);
             } else if (world[wIndex] == 4) {
                 tiles[vIndex].setIcon(oldman);    //old man
             } else if (world[wIndex] == 5) {
@@ -431,23 +512,37 @@ public class GroupPD implements KeyListener{
                 }
             }
 
+
             character[vIndex].setIcon(null);
 
             // draw player if here
-            if (wx == playerX && wy == playerY)
+            if (!inCave && wx == playerX && wy == playerY)
                 character[vIndex].setIcon(getPlayerFrame());
             }
         }
     }
 
+    public boolean gr9() {
+        SwingUtilities.invokeLater(this::MainCodeBlock);
+        return true;
+    }
     public static void main(String[] args) {
         GroupPD yes = new GroupPD();
         yes.MainCodeBlock();
     }
     public boolean isBlocked(int x, int y) {
         int index = worldIndex(x, y);
-        return world[index] == TREE || world[index] == SNAKE || world[index] == FLOWER || world[index] == OLDMAN || world[index] == PORTAL;
+        return world[index] == TREE || world[index] == CAVE || world[index] == FLOWER || world[index] == OLDMAN || world[index] == PORTAL;
     }
+    public void enterCave() {
+        inCave = true;
+        render(snakess, portall); // refresh screen
+    }
+    public void exitCave() {
+        inCave = false;
+        render(snakess, portall);
+    }
+
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -456,36 +551,23 @@ public class GroupPD implements KeyListener{
 
     @Override
     public void keyPressed(KeyEvent e) {
-        try {
-
-            int key = e.getKeyCode();
-            
-            if (key == KeyEvent.VK_W || key == KeyEvent.VK_A || key == KeyEvent.VK_S || key == KeyEvent.VK_D) {
-
-                throw new InvalidMovementKeyException("Use Arrow Keys only.");
-            }
-
-            if (key == KeyEvent.VK_RIGHT) {
-                direction = 2;
-                movePlayer(1, 0);
-            }
-            if (key == KeyEvent.VK_LEFT) {
-                direction = 1;
-                movePlayer(-1, 0);
-            }
-            if (key == KeyEvent.VK_DOWN) {
-                direction = 0;
-                movePlayer(0, 1);
-            }
-            if (key == KeyEvent.VK_UP) {
-                direction = 3;
-                movePlayer(0, -1);
-            }
+        if (inCave) return;
+        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+            direction = 2;
+            movePlayer(1, 0);
         }
-        catch (InvalidMovementKeyException ex) {
-            JOptionPane.showMessageDialog(frame, ex.getMessage());
+        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+            direction = 1;
+            movePlayer(-1, 0);
         }
-        
+        if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+            direction = 0;
+            movePlayer(0, 1);
+        }
+        if (e.getKeyCode() == KeyEvent.VK_UP) {
+            direction = 3;
+            movePlayer(0, -1);
+        }
 
 
         //Get x and y values in real time
@@ -494,22 +576,8 @@ public class GroupPD implements KeyListener{
         //Interaction
         if ((playerX == 6 && playerY == 4)||(playerX == 7 && playerY == 3)||(playerX == 6 && playerY == 2)||(playerX == 5 && playerY == 3)) {
             if (e.getKeyCode() == KeyEvent.VK_E) {
-                if (wincon == 0) {
-                    new Thread(() -> {
-                    boolean correct = new interaction().startdainteraction();
-                    }).start(); 
-                }
-                else if (wincon == 1) {
-                    new Thread(() -> {
-                    boolean correct = new interaction2().startdainteraction2();
-                    }).start(); 
-                }
-                else if (wincon == 2) {
-                    new Thread(() -> {
-                    boolean correct = new interaction3().startdainteraction3();
-                    }).start(); 
-                }
-                
+                setChatVisible(true);
+                nextB.setVisible(true);
             }
         }
         
@@ -819,34 +887,28 @@ public class GroupPD implements KeyListener{
             }
         }
 
-        //Snake Summon
+        //Cave enter
         if ((playerX == 18 && playerY == 19)) {
             if(e.getKeyCode() == KeyEvent.VK_E){
                 if(keyc >= 6) {
-                    if (snakess == 0) {
-                        JOptionPane.showMessageDialog(frame, "You hear a slight rumbling noise..", "Information", JOptionPane.INFORMATION_MESSAGE);
-                        snakess++;
-                    }
-                }
-            }
-        }
-        
-        //Snake Battle
-        if ((playerX == 18 && playerY == 19)) {
-            if(e.getKeyCode() == KeyEvent.VK_K){
-                if(snakess == 1) {
+                    enterCave();
                     new Thread(() -> {
-                        boolean won = new battleMockUp().startBattleAndWait();
-
-                        if (won) {
-                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        boolean received = new GroupPD6().GroupPD6Connect();
+                        
+                        SwingUtilities.invokeLater(() -> {
+                            if (received) {
+                            exitCave();//
+                            chatText.setText("Quick! Open the portal! Just one more step to reach freedom.");
+                            nextB.setText("Next");
                             wincon++;
-                        } else {
-                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
-                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
-                            frame.dispose();
-                        }
+                            } else {
+                                frame.dispose();
+                            }
+                        });
+                        
                     }).start();
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Missing Requirements: " + keyc + "/6 rats", "Information", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
         }
@@ -858,7 +920,10 @@ public class GroupPD implements KeyListener{
                     JOptionPane.showMessageDialog(frame, "The portal has started to open..", "Information", JOptionPane.INFORMATION_MESSAGE);
                     portall++;
                     wincon++;
-                    System.out.println(wincon);
+                    chatText.setText("Hey..");
+                    cct++;
+                    nextB.setText("Thank you.");
+                    render(snakess, portall);
                 }
             }
         }
@@ -866,8 +931,10 @@ public class GroupPD implements KeyListener{
         if ((playerX == 7 && playerY == 4)||(playerX == 8 && playerY == 3)||(playerX == 7 && playerY == 2)) {
             if(e.getKeyCode() == KeyEvent.VK_K){
                 if(wincon == 2) {
+                    loadPlayerHealth();
+                    JOptionPane.showMessageDialog(frame, "You have escaped!, " + ph + "/200 Health Remaining.", "Information", JOptionPane.INFORMATION_MESSAGE);
                     frame.dispose();
-                    JOptionPane.showMessageDialog(frame, "You have escaped!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                    new ADMINBLDG().gr10();
                 }
             }
         }
@@ -878,6 +945,98 @@ public class GroupPD implements KeyListener{
     public void keyReleased(KeyEvent e) {
     }
 
-
-
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource()==exitB){
+            setChatVisible(false);
+            frame.setFocusable(true);
+            frame.setVisible(false);
+            frame.setVisible(true);
+        } else if (e.getSource()==nextB) {
+            if (wincon == 0) {
+                if (cht == 0) {
+                    chatText.setText("Who am I? I definitely look like an old man.");
+                    cht++;
+                    nextB.setVisible(true);
+                    nextB.setText("Next");
+                } else if (cht == 1) {
+                    chatText.setText("But in reality, I represent the faint determination and motivation you have inside you.");
+                    cht++;
+                } else if (cht == 2) {
+                    chatText.setText("So, I am here to help you.");
+                    cht++;
+                } else if (cht == 3) {
+                    chatText.setText("You are inside a matrix, a place where a snake lives, and practically rules over");
+                    cht++;
+                } else if (cht == 4) {
+                    chatText.setText("This place has been influenced by your past trauma of being bitten by a snake once in the oval");
+                    cht++;
+                } else if (cht == 5) {
+                    chatText.setText("You ran and.. you tripped.");
+                    cht++;
+                } else if (cht == 6) {
+                    chatText.setText("Causing you to be sent to the hospital.");
+                    cht++;
+                } else if (cht == 7) {
+                    chatText.setText("This snake.. represents misfortune.");
+                    cht++;
+                } else if (cht == 8) {
+                    chatText.setText("This parallel universe, this dark version of the oval,");
+                    cht++;
+                } else if (cht == 9) {
+                    chatText.setText("This place.. it represents, trauma.");
+                    cht++;
+                } else if (cht == 10) {
+                    chatText.setText("Escape this place at all costs!");
+                    cht++;
+                    nextB.setText("How?");
+                } else if (cht == 11) {
+                    chatText.setText("In the center of this world, there is a snake, sealed in concrete.");
+                    cht++;
+                    nextB.setText("Next");
+                } else if (cht == 12) {
+                    chatText.setText("btaining one of the eyes of the snake will let you open this portal fully, leading you out of this place.");
+                    cht++;
+                } else if (cht == 13) {
+                    chatText.setText("To motivate it to break its own seal, you need to appetize it, by bringing atleast 6 rats.");
+                    cht++;
+                } else if (cht == 14) {
+                    chatText.setText("Rats live inside trees.  You have to find them by interacting with the trees.");
+                    cht++;
+                } else if (cht == 15) {
+                    chatText.setText("Be careful though, as if you are too reckless, the rats may either scurry away, or fight you.");
+                    cht++;
+                } else if (cht == 16) {
+                    chatText.setText("If they do fight you and you get their health low, they might try to flee..");
+                    cht++;
+                } else if (cht == 17) {
+                    chatText.setText("Once you do get 6 rats, enter the cave entrance at the middle of the map.");
+                    cht++;
+                } else if (cht == 18) {
+                    chatText.setText("I will see you there, inside the cave.");
+                    cht = 11;
+                    nextB.setVisible(false);
+                }
+            } else if (wincon == 2) {
+                if (cct == 1) {
+                    chatText.setText("...");
+                    cct++;
+                    nextB.setText("Next");
+                } else if (cct == 2) {
+                    chatText.setText("I represent your determination, don't thank me.");
+                    cct++;
+                    nextB.setText("Next");
+                } else if (cct == 3) {
+                    chatText.setText("Thank yourself.");
+                    cct++;
+                    nextB.setVisible(false);
+                }
+            }
+            
+        }
     }
+}
+
+
+
+    
