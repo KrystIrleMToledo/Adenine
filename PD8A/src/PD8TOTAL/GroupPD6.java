@@ -1,0 +1,1300 @@
+package PD8TOTAL;
+
+// Paller
+// Daned
+// Jonson
+//Game Objetives:
+// 1. Find Ruler of Snakes
+// 2. In the pathway, there would be obstacles that you must clear to reach the Snake
+// 3. Once you find the Ruler of Snakes, use the rats you have collected from the past Map 1 to uncrystalize it
+// 4. Defeat the Snake to collect its eye and exit the cave
+
+
+import java.io.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.Timer;
+ 
+
+public class GroupPD6 implements KeyListener, ActionListener{
+    
+    class InvalidMovementKeyException extends Exception {
+        public InvalidMovementKeyException(String message) {
+            super(message);
+        }
+    }
+    
+    JFrame frame;
+    ImageIcon playerIcon1;
+    ImageIcon playerIcon2;
+    ImageIcon playerIcon3;
+    ImageIcon playerIcon4;
+    ImageIcon playerIcon5;
+    ImageIcon playerIcon6;
+    ImageIcon playerIcon7;
+    ImageIcon playerIcon8;
+    ImageIcon playerIcon9;
+    ImageIcon playerIcon10;
+    ImageIcon playerIcon11;
+    ImageIcon playerIcon12;
+    ImageIcon oldman;
+    ImageIcon tile1;
+    ImageIcon bridge;
+    ImageIcon bridge2;
+    ImageIcon bridge3;
+    ImageIcon bridge4;
+    ImageIcon bridge5;
+    ImageIcon bridge6;
+    ImageIcon bridge7;
+    ImageIcon bridge8;
+    ImageIcon mountain;
+    ImageIcon rocks;
+    ImageIcon fence;
+    ImageIcon snake1;
+    ImageIcon snake2;
+    int charPlace[];
+    int mapLayout[];
+    int mapWidth=12;
+    int mapHeight=12;
+    int frameWidth=1050;
+    int frameHeight=1050;
+    int charac;
+    int charX;
+    int charY;
+    int characterMode;
+    int worldWidth = 36;
+    int worldHeight = 36;
+    int[] world = new int[worldWidth * worldHeight];
+    int viewWidth = 12;
+    int viewHeight = 12;
+    JLabel[] tiles = new JLabel[viewWidth * viewHeight];
+    JLabel[] character = new JLabel[viewWidth * viewHeight];
+    JLabel snakeLabel;
+    int camX = 0;   // world column of top-left camera tile
+    int camY = 0;   // world row of top-left camera tile
+    int playerIndex;     // index in the WORLD
+    int playerX = 6;         // world column
+    int playerY = 6;         // world row
+    int tempX = 0;
+    int tempY = 0;
+    int keyc = 0;
+    int e1n = 0;
+    int e2n = 0;
+    int e3n = 0;
+    int e4n = 0;
+    int e5n = 0;
+    int e6n = 0;
+    int e7n = 0;
+    int e8n = 0;
+    int GRASS = 0;
+    private int BRIDGE = 1;
+    private int BRIDGE2 = 2;
+    private int BRIDGE3 = 9;
+    private int BRIDGE4 = 10;
+    private int BRIDGE5 = 11;
+    private int BRIDGE6 = 12;
+    private int BRIDGE7 = 13;
+    private int BRIDGE8 = 14;
+    private int MOUNTAIN = 6;
+    private int ROCKS = 7; //7
+    private int FENCE = 8; //8
+    private int SNAKE = 3;
+    private int OLDMAN = 4;
+    private int PORTAL = 5;
+    int snakess = 0;
+    int portall = 0;
+    int direction = 0; // 0=down, 1=left, 2=right, 3=up
+    int animFrame = 0; // 0=idle, 1=walk1, 2=walk2
+    int walkStep = 0;
+    int wincon = 0;
+    int cht = 0;
+    int bct = 0;
+    boolean finished = false;
+    boolean gamewon = false;
+    
+    JLabel chatBox;
+    JLabel chatText;
+    JButton nextB;
+    JButton exitB;
+    
+    ImageIcon getPlayerFrame() {
+    switch (direction) {
+        case 0: // DOWN
+            if (animFrame == 1) return playerIcon2;
+            if (animFrame == 2) return playerIcon3;
+            return playerIcon1;
+
+        case 1: // LEFT
+            if (animFrame == 1) return playerIcon5;
+            if (animFrame == 2) return playerIcon6;
+            return playerIcon4;
+
+        case 2: // RIGHT
+            if (animFrame == 1) return playerIcon8;
+            if (animFrame == 2) return playerIcon9;
+            return playerIcon7;
+
+        case 3: // UP
+            if (animFrame == 1) return playerIcon11;
+            if (animFrame == 2) return playerIcon12;
+            return playerIcon10;
+        }   
+        return playerIcon1; // fallback
+    }
+    int c;
+    int ph;
+
+
+    
+    int worldIndex(int x, int y) {
+        return y * worldWidth + x;
+    }
+    int viewIndex(int x, int y) {
+        return y * viewWidth + x;
+    }
+    
+    String playerType = "";
+    private void loadPlayerHealth() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("phealth.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                ph = Integer.parseInt(line);
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("Text not found, going 200");
+            ph = 200;
+        }
+    }
+    
+    private void writePlayerHealth() {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("phealth.txt"));
+            bw.write("200");
+            bw.close();
+        } catch (IOException e) {
+            System.out.println("Can't locate file");
+        }
+    }
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
+
+
+    public GroupPD6() {
+        writePlayerHealth();
+        chatBox=new JLabel();
+        chatText=new JLabel("Hello wanderer");
+        nextB=new JButton("Next");
+        exitB=new JButton("Exit");
+        
+        frame = new JFrame();
+        charX=-1;
+        charY=-1;
+        characterMode=0;
+        
+        tile1 = new ImageIcon("Images/gr9/PD6/tile1.png");
+        bridge = new ImageIcon("Images/gr9/PD6/bridge.png");
+        bridge2 = new ImageIcon("Images/gr9/PD6/bridge2.png");
+        bridge3 = new ImageIcon("Images/gr9/PD6/bridge3.png");
+        bridge4 = new ImageIcon("Images/gr9/PD6/bridge4.png");
+        bridge5 = new ImageIcon("Images/gr9/PD6/bridge5.png");
+        bridge6 = new ImageIcon("Images/gr9/PD6/bridge6.png");
+        bridge7 = new ImageIcon("Images/gr9/PD6/bridge7.png");
+        bridge8 = new ImageIcon("Images/gr9/PD6/bridge8.png");
+        mountain = new ImageIcon("Images/gr9/PD6/mountain.png");
+        rocks = new ImageIcon("Images/gr9/PD6/rocks.png");
+        fence = new ImageIcon("Images/gr9/PD6/fence.png");
+        
+        loadPlayerType();
+        if (playerType.equals("girl")) {
+            //downwards animation
+            playerIcon1=new ImageIcon("Images/gr9/girlidle1.png");
+            playerIcon2=new ImageIcon("Images/gr9/girlwalk1.png");
+            playerIcon3=new ImageIcon("Images/gr9/girlwalk2.png");
+
+            //left animation
+            playerIcon4=new ImageIcon("Images/gr9/girlidle2.png");
+            playerIcon5=new ImageIcon("Images/gr9/girlwalk4.png");
+            playerIcon6=new ImageIcon("Images/gr9/girlwalk8.png");
+
+            //right animation
+            playerIcon7=new ImageIcon("Images/gr9/girlidle3.png");
+            playerIcon8=new ImageIcon("Images/gr9/girlwalk3.png");
+            playerIcon9=new ImageIcon("Images/gr9/girlwalk7.png");
+
+            //upwards animation
+            playerIcon10=new ImageIcon("Images/gr9/girlidle4.png");
+            playerIcon11=new ImageIcon("Images/gr9/girlwalk5.png");
+            playerIcon12=new ImageIcon("Images/gr9/girlwalk6.png");
+        } else {
+            //downwards animation
+            playerIcon1=new ImageIcon("Images/gr9/boyidle1.png");
+            playerIcon2=new ImageIcon("Images/gr9/boywalk1.png");
+            playerIcon3=new ImageIcon("Images/gr9/boywalk2.png");
+
+            //left animation
+            playerIcon4=new ImageIcon("Images/gr9/boyidle2.png");
+            playerIcon5=new ImageIcon("Images/gr9/boywalk4.png");
+            playerIcon6=new ImageIcon("Images/gr9/boywalk8.png");
+
+            //right animation
+            playerIcon7=new ImageIcon("Images/gr9/boyidle3.png");
+            playerIcon8=new ImageIcon("Images/gr9/boywalk3.png");
+            playerIcon9=new ImageIcon("Images/gr9/boywalk7.png");
+
+            //upwards animation
+            playerIcon10=new ImageIcon("Images/gr9/boyidle4.png");
+            playerIcon11=new ImageIcon("Images/gr9/boywalk5.png");
+            playerIcon12=new ImageIcon("Images/gr9/boywalk6.png");
+        }
+        
+        snake1=new ImageIcon("Images/gr9/PD6/snake1.png");
+        snake2=new ImageIcon("Images/gr9/PD6/snake2.png");
+        oldman=new ImageIcon("Images/gr9/PD6/oldman.png");
+        
+        playerIcon1=new ImageIcon(playerIcon1.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon2=new ImageIcon(playerIcon2.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon3=new ImageIcon(playerIcon3.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon4=new ImageIcon(playerIcon4.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon5=new ImageIcon(playerIcon5.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon6=new ImageIcon(playerIcon6.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon7=new ImageIcon(playerIcon7.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon8=new ImageIcon(playerIcon8.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon9=new ImageIcon(playerIcon9.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon10=new ImageIcon(playerIcon10.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon11=new ImageIcon(playerIcon11.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        playerIcon12=new ImageIcon(playerIcon12.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        
+        tile1=new ImageIcon(tile1.getImage().getScaledInstance((frameWidth/mapWidth), (frameHeight/mapHeight), Image.SCALE_DEFAULT));
+        bridge = new ImageIcon(bridge.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        bridge2 = new ImageIcon(bridge2.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        bridge3 = new ImageIcon(bridge3.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        bridge4 = new ImageIcon(bridge4.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        bridge5 = new ImageIcon(bridge5.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        bridge6 = new ImageIcon(bridge6.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        bridge7 = new ImageIcon(bridge7.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        bridge8 = new ImageIcon(bridge8.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        mountain = new ImageIcon(mountain.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        rocks = new ImageIcon(rocks.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        fence = new ImageIcon(fence.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        snake1 = new ImageIcon(snake1.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        snake2 = new ImageIcon(snake2.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        oldman = new ImageIcon(oldman.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        try {
+            for (int i = 0; i < world.length; i++) {
+                world[i] = 0;
+            }
+
+            world[worldIndex(2, 5)] = 4;
+
+            world[worldIndex(21, 17)] = 9;
+
+            world[worldIndex(1, 34)] = 3;
+
+            world[worldIndex(22, 10)] = 6;
+            world[worldIndex(25, 22)] = 6;
+            world[worldIndex(20, 30)] = 6;
+            world[worldIndex(4, 30)] = 6;
+            world[worldIndex(4, 19)] = 6;
+            world[worldIndex(8, 19)] = 6;
+
+            world[worldIndex(20, 3)] = 11;
+            world[worldIndex(20, 17)] = 11;
+            world[worldIndex(8, 27)] = 11;
+
+            world[worldIndex(20, 8)] = 12;
+            world[worldIndex(20, 22)] = 12;
+            world[worldIndex(25, 14)] = 12;
+
+            world[worldIndex(15, 3)] = 13;
+            world[worldIndex(15, 12)] = 13;
+            world[worldIndex(14, 27)] = 13;
+            world[worldIndex(31, 32)] = 13;
+            world[worldIndex(22, 17)] = 13;
+
+            world[worldIndex(15, 8)] = 14;
+            world[worldIndex(14, 17)] = 14;
+            world[worldIndex(31, 14)] = 14;
+
+            for (int x = 16; x <= 19; x++) {
+                world[worldIndex(x, 8)] = 8;
+            }
+            for (int y = 13; y <= 16; y++) {
+                world[worldIndex(13, y)] = 8;
+            }
+            for (int x = 15; x <= 19; x++) {
+                world[worldIndex(x, 17)] = 8;
+            }
+            for (int y = 28; y <= 29; y++) {
+                world[worldIndex(14, y)] = 8;
+            }
+            for (int x = 32; x <= 35; x++) {
+                world[worldIndex(x, 32)] = 8;
+            }
+
+            for (int x = 0; x <= 14; x++) {
+                world[worldIndex(x, 3)] = 9;
+            }
+            for (int x = 0; x <= 14; x++) {
+                world[worldIndex(x, 8)] = 10;
+            }
+            for (int x = 21; x <= 35; x++) {
+                world[worldIndex(x, 3)] = 9;
+            }
+            for (int x = 21; x <= 35; x++) {
+                world[worldIndex(x, 8)] = 10;
+            }
+            for (int y = 0; y <= 2; y++) {
+                world[worldIndex(15, y)] = 1;
+            }
+            for (int y = 0; y <= 2; y++) {
+                world[worldIndex(20, y)] = 2;
+            }
+            for (int y = 9; y <= 11; y++) {
+                world[worldIndex(15, y)] = 1;
+            }
+            for (int x = 0; x <= 14; x++) {
+                world[worldIndex(x, 12)] = 9;
+            }
+            for (int x = 0; x <= 13; x++) {
+                world[worldIndex(x, 17)] = 10;
+            }
+            for (int y = 9; y <= 16; y++) {
+                world[worldIndex(20, y)] = 2;
+            }
+            for (int y = 15; y <= 21; y++) {
+                world[worldIndex(25, y)] = 2;
+            }
+            for (int x = 23; x <= 35; x++) {
+                world[worldIndex(x, 10)] = 9;
+            }
+            for (int x = 26; x <= 30; x++) {
+                world[worldIndex(x, 14)] = 10;
+            }
+            for (int y = 15; y <= 31; y++) {
+                world[worldIndex(31, y)] = 1;
+            }
+            for (int x = 21; x <= 24; x++) {
+                world[worldIndex(x, 22)] = 10;
+            }
+            for (int x = 0; x <= 30; x++) {
+                world[worldIndex(x, 32)] = 9;
+            }
+            for (int y = 9; y <= 16; y++) {
+                world[worldIndex(20, y)] = 2;
+            }
+            for (int y = 11; y <= 16; y++) {
+                world[worldIndex(22, y)] = 1;
+            }
+
+
+            for (int y = 23; y <= 29; y++) {
+                world[worldIndex(20, y)] = 2;
+            }
+            for (int y = 18; y <= 26; y++) {
+                world[worldIndex(14, y)] = 1;
+            }
+            for (int y = 20; y <= 26; y++) {
+                world[worldIndex(8, y)] = 2;
+            }
+            for (int y = 20; y <= 29; y++) {
+                world[worldIndex(4, y)] = 1;
+            }
+            for (int x = 5; x <= 7; x++) {
+                world[worldIndex(x, 19)] = 9;
+            }
+            for (int x = 9; x <= 13; x++) {
+                world[worldIndex(x, 27)] = 9;
+            }
+            for (int x = 5; x <= 19; x++) {
+                world[worldIndex(x, 30)] = 10;
+            }
+
+            for (int y = 0; y <= 2; y++) {
+                for (int x = 21; x <= 35; x++) {
+                    world[worldIndex(x, y)] = 6;
+                }
+            }
+            for (int y = 0; y <= 2; y++) {
+                for (int x = 0; x <= 14; x++) {
+                    world[worldIndex(x, y)] = 6;
+                }
+            }
+            for (int y = 9; y <= 11; y++) {
+                for (int x = 0; x <= 14; x++) {
+                    world[worldIndex(x, y)] = 6;
+                }
+            }
+            for (int x = 21; x <= 35; x++) {
+                world[worldIndex(x, 9)] = 6;
+            }
+            for (int x = 0; x <= 13; x++) {
+                world[worldIndex(x, 18)] = 6;
+            }
+            for (int x = 0; x <= 30; x++) {
+                world[worldIndex(x, 31)] = 6;
+            }
+            for (int y = 10; y <= 16; y++) {
+                world[worldIndex(21, y)] = 6;
+            }
+            for (int y = 23; y <= 30; y++) {
+                for (int x = 21; x <= 30; x++) {
+                    world[worldIndex(x, y)] = 6;
+                }
+            }
+            for (int y = 15; y <= 22; y++) {
+                for (int x = 26; x <= 30; x++) {
+                    world[worldIndex(x, y)] = 6;
+                }
+            }
+            for (int y = 19; y <= 26; y++) {
+                for (int x = 9; x <= 13; x++) {
+                    world[worldIndex(x, y)] = 6;
+                }
+            }
+            for (int y = 19; y <= 30; y++) {
+                for (int x = 0; x <= 3; x++) {
+                    world[worldIndex(x, y)] = 6;
+                }
+            }
+
+            world[worldIndex(16, 3)] = 7;
+            world[worldIndex(17, 3)] = 7;
+            world[worldIndex(18, 3)] = 7;
+            world[worldIndex(19, 3)] = 7;
+            world[worldIndex(23, 17)] = 7;
+            world[worldIndex(24, 17)] = 7;
+            world[worldIndex(23, 16)] = 7;
+            world[worldIndex(24, 16)] = 7;
+            world[worldIndex(23, 15)] = 7;
+            world[worldIndex(24, 15)] = 7;
+            world[worldIndex(24, 14)] = 7;
+        }
+        catch (ArrayIndexOutOfBoundsException ex) {
+            JOptionPane.showMessageDialog(frame,"Tile placed outside world bounds.","Array Error",JOptionPane.ERROR_MESSAGE);
+        }
+        
+        try {
+            character=new JLabel[mapWidth*mapHeight];
+            charPlace=new int[]{
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,1,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0
+            };
+            if(charPlace.length != mapWidth * mapHeight){
+                throw new ArrayIndexOutOfBoundsException("Map size is incorrect");
+            }
+            for(int i=0;i<character.length;i++){
+                if(charPlace[i]==1){
+                    character[i]=new JLabel(playerIcon1);
+                    charac=i;
+                }
+                else character[i]=new JLabel();
+            }
+        }
+        catch(ArrayIndexOutOfBoundsException ex) {
+            JOptionPane.showMessageDialog(frame,"Map size for character is incorrect","Error",JOptionPane.ERROR_MESSAGE);
+        }
+        
+        try {
+            tiles=new JLabel[mapWidth*mapHeight];
+            mapLayout=new int[]{
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0
+            };
+            if(mapLayout.length != mapWidth * mapHeight){
+                throw new ArrayIndexOutOfBoundsException("Map size is incorrect");
+            }
+            for(int i=0;i<tiles.length;i++){
+                if(mapLayout[i]==0) tiles[i]=new JLabel(tile1);
+            }
+        }
+        catch(ArrayIndexOutOfBoundsException ex) {
+            JOptionPane.showMessageDialog(frame,"Map size for character is incorrect","Error",JOptionPane.ERROR_MESSAGE);
+        }
+        
+
+
+    }
+    public void MainCodeBlock() {
+        frame.setLayout(new GraphPaperLayout(new Dimension(mapWidth, mapHeight)));
+        
+        frame.add(chatText, new Rectangle(1,8,7,1));
+        frame.add(nextB, new Rectangle(10,9,2,1));
+        frame.add(exitB, new Rectangle(8,9,2,1));
+        frame.add(chatBox, new Rectangle(0,7,12,4));
+        chatBox.setOpaque(true);
+        chatBox.setBackground(Color.white);
+
+        int x=0, y=0, w=1, h=1;
+        for(int i=0;i<character.length;i++){
+            frame.add(character[i], new Rectangle(x,y,w,h));
+            x++;
+            if(x%mapWidth==0){
+                x=0;
+                y++;
+            }
+        }
+        
+        x=0; y=0; w=1; h=1;
+        for(int i=0;i<tiles.length;i++){
+            frame.add(tiles[i], new Rectangle(x,y,w,h));
+            x++;
+            if(x%mapWidth==0){
+                x=0;
+                y++;
+            }
+        }
+        frame.setSize(frameWidth,frameHeight);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setResizable(false);
+        frame.setVisible(true);
+        frame.requestFocusInWindow();
+        frame.addKeyListener(this);
+        
+        exitB.addActionListener(this);
+        nextB.addActionListener(this);
+        setChatVisible(false);
+        
+        render(snakess, portall);
+        
+    }
+    
+    public void setChatVisible(boolean b){
+        chatBox.setVisible(b);
+        chatText.setVisible(b);
+        nextB.setVisible(b);
+        exitB.setVisible(b);
+    }
+    
+    public void movePlayer(int dx, int dy) {
+        int nx = playerX + dx;
+        int ny = playerY + dy;
+
+        // bounds check
+        if (nx < 0 || ny < 0 || nx >= worldWidth || ny >= worldHeight) {
+            animFrame = 0;   // idle
+            walkStep = 0;
+            render(snakess, portall);
+            return;
+        }
+
+        // TREE / SNAKE COLLISION CHECK
+        if (isBlocked(nx, ny)) {
+            animFrame = 0;   // idle
+            walkStep = 0;
+            render(snakess, portall);
+            return;
+        }
+
+        
+        //move player
+        playerX = nx;
+        playerY = ny;
+        
+        // animation logic
+        if (direction == 1 || direction == 2) {
+            // left - right
+            walkStep++;
+
+            if (walkStep == 1) animFrame = 1;      // walk1
+            else if (walkStep == 2) animFrame = 0; // idle
+            else if (walkStep == 3) animFrame = 2; // walk2
+            else {
+                animFrame = 0;
+                walkStep = 0;
+            }
+        } else {
+            // up - down
+            animFrame++;
+            if (animFrame > 2) animFrame = 1;
+        }
+
+
+
+
+        // move camera so player stays near middle
+        camX = playerX - viewWidth / 2;
+        camY = playerY - viewHeight / 2;
+
+        // clamp camera bounds
+        if (camX < 0) camX = 0;
+        if (camY < 0) camY = 0;
+        if (camX > worldWidth - viewWidth) camX = worldWidth - viewWidth;
+        if (camY > worldHeight - viewHeight) camY = worldHeight - viewHeight;
+
+        render(snakess, portall);
+    }
+
+    
+    public void render(int snakep, int portalp) {
+    for (int vy = 0; vy < viewHeight; vy++) {
+        for (int vx = 0; vx < viewWidth; vx++) {
+
+            int wx = camX + vx;
+            int wy = camY + vy;
+
+            int wIndex = worldIndex(wx, wy);
+            int vIndex = viewIndex(vx, vy);
+
+            // draw tile based on world value
+            if (world[wIndex] == 0) {
+                tiles[vIndex].setIcon(tile1);   // grass
+            } else if (world[wIndex] == 1) {
+                tiles[vIndex].setIcon(bridge);   // bridge
+            } else if (world[wIndex] == 2) {
+                tiles[vIndex].setIcon(bridge2);   // bridge2
+            } else if (world[wIndex] == 3) {
+                if (snakep == 0) {
+                    tiles[vIndex].setIcon(snake1);   // snake stone
+                }
+                else {
+                    tiles[vIndex].setIcon(snake2);   // snake
+                }
+            } else if (world[wIndex] == 4) {
+                tiles[vIndex].setIcon(oldman);    //old man
+            } else if (world[wIndex] == 6) {
+                tiles[vIndex].setIcon(mountain); 
+            } else if (world[wIndex] == 7) {
+                tiles[vIndex].setIcon(rocks); 
+            } else if (world[wIndex] == 8) {
+                tiles[vIndex].setIcon(fence); 
+            } else if (world[wIndex] == 9) {
+                tiles[vIndex].setIcon(bridge3); 
+            } else if (world[wIndex] == 10) {
+                tiles[vIndex].setIcon(bridge4); 
+            } else if (world[wIndex] == 11) {
+                tiles[vIndex].setIcon(bridge5); //right - bottom
+            } else if (world[wIndex] == 12) {
+                tiles[vIndex].setIcon(bridge6); //right - top
+            } else if (world[wIndex] == 13) {
+                tiles[vIndex].setIcon(bridge7); //left - bottom
+            } else if (world[wIndex] == 14) {
+                tiles[vIndex].setIcon(bridge8); //left - top
+            }
+
+
+            character[vIndex].setIcon(null);
+
+            // draw player if here
+            if (wx == playerX && wy == playerY)
+                character[vIndex].setIcon(getPlayerFrame());
+            }
+        }
+    }
+    
+    public boolean isBlocked(int x, int y) {
+        int index = worldIndex(x, y);
+        return world[index] == SNAKE || world[index] == OLDMAN || world[index] == PORTAL
+                 || world[index] == MOUNTAIN || world[index] == BRIDGE || world[index] == BRIDGE2 || world[index] == BRIDGE3 || world[index] == BRIDGE4
+                 || world[index] == BRIDGE5 || world[index] == BRIDGE6 || world[index] == BRIDGE7 || world[index] == BRIDGE8 || world[index] == ROCKS || world[index] == FENCE;
+    }
+    
+    public boolean GroupPD6Connect() {
+        SwingUtilities.invokeLater(this::MainCodeBlock);
+
+        while (!finished) {
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException ignored) {}
+        }
+
+        return gamewon;
+    }
+    
+
+    public static void main(String[] args) {
+        GroupPD6 yes = new GroupPD6();
+        yes.MainCodeBlock();
+    }
+
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        try {
+
+            int key = e.getKeyCode();
+
+            if (key == KeyEvent.VK_W ||
+                key == KeyEvent.VK_A ||
+                key == KeyEvent.VK_S ||
+                key == KeyEvent.VK_D) {
+
+                throw new InvalidMovementKeyException("Use Arrow Keys only.");
+            }
+
+            if (key == KeyEvent.VK_RIGHT) {
+                direction = 2;
+                movePlayer(1, 0);
+            }
+            if (key == KeyEvent.VK_LEFT) {
+                direction = 1;
+                movePlayer(-1, 0);
+            }
+            if (key == KeyEvent.VK_DOWN) {
+                direction = 0;
+                movePlayer(0, 1);
+            }
+            if (key == KeyEvent.VK_UP) {
+                direction = 3;
+                movePlayer(0, -1);
+            }
+        }
+        catch (InvalidMovementKeyException ex) {
+            JOptionPane.showMessageDialog(frame, ex.getMessage());
+        }
+
+
+        //Get x and y values in real time
+        System.out.println(playerX + " " + playerY);
+        
+        //Interaction
+        if ((playerX == 2 && playerY == 6)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                setChatVisible(true);
+                /*
+                if (wincon == 0) {
+                    new Thread(() -> {
+                    boolean correct = new interaction().startdainteraction();
+                    }).start(); 
+                }
+                else if (wincon == 1) {
+                    new Thread(() -> {
+                    boolean correct = new interaction2().startdainteraction2();
+                    }).start(); 
+                }
+                else if (wincon == 2) {
+                    new Thread(() -> {
+                    boolean correct = new interaction3().startdainteraction3();
+                    }).start(); 
+                }
+                */
+            }
+        }
+        
+        //rocks
+        if ((playerX == 16 && playerY == 4)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                c = (int)(Math.random()*10+1);
+                JOptionPane.showMessageDialog(frame, "You found a snake under the rock!", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                if (c >= 1 && c <=4) {
+                    JOptionPane.showMessageDialog(frame, "The Snake was startled and ran away", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    world[worldIndex(16, 3)] = 0;
+                    render(snakess, portall);
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "The Snake decided to choose violence.", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    new Thread(() -> {
+                        boolean won = new battleMockUp3().startBattleAndWait3();
+                        if (won) {
+                            world[worldIndex(16, 3)] = 0;
+                            render(snakess, portall);
+                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    }).start();
+                }
+            }
+        }
+        if ((playerX == 17 && playerY == 4)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                c = (int)(Math.random()*10+1);
+                JOptionPane.showMessageDialog(frame, "You found a snake under the rock!", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                if (c >= 1 && c <=4) {
+                    JOptionPane.showMessageDialog(frame, "The Snake was startled and ran away", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    world[worldIndex(16, 3)] = 0;
+                    render(snakess, portall);
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "The Snake decided to choose violence.", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    new Thread(() -> {
+                        boolean won = new battleMockUp3().startBattleAndWait3();
+                        if (won) {
+                            world[worldIndex(17, 3)] = 0;
+                            render(snakess, portall);
+                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    }).start();
+                }
+            }
+        }
+        if ((playerX == 18 && playerY == 4)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                c = (int)(Math.random()*10+1);
+                JOptionPane.showMessageDialog(frame, "You found a snake under the rock!", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                if (c >= 1 && c <=4) {
+                    JOptionPane.showMessageDialog(frame, "The Snake was startled and ran away", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    world[worldIndex(18, 3)] = 0;
+                    render(snakess, portall);
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "The Snake decided to choose violence.", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    new Thread(() -> {
+                        boolean won = new battleMockUp3().startBattleAndWait3();
+                        if (won) {
+                            world[worldIndex(18, 3)] = 0;
+                            render(snakess, portall);
+                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    }).start();
+                }
+            }
+        }
+        if ((playerX == 19 && playerY == 4)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                c = (int)(Math.random()*10+1);
+                JOptionPane.showMessageDialog(frame, "You found a snake under the rock!", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                if (c >= 1 && c <=4) {
+                    JOptionPane.showMessageDialog(frame, "The Snake was startled and ran away", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    world[worldIndex(19, 3)] = 0;
+                    render(snakess, portall);
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "The Snake decided to choose violence.", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    new Thread(() -> {
+                        boolean won = new battleMockUp3().startBattleAndWait3();
+                        if (won) {
+                            world[worldIndex(19, 3)] = 0;
+                            render(snakess, portall);
+                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    }).start();
+                }
+            }
+        }
+        
+        if ((playerX == 23 && playerY == 18)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                c = (int)(Math.random()*10+1);
+                JOptionPane.showMessageDialog(frame, "You found a snake under the rock!", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                if (c >= 1 && c <=4) {
+                    JOptionPane.showMessageDialog(frame, "The Snake was startled and ran away", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    world[worldIndex(23, 17)] = 0;
+                    render(snakess, portall);
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "The Snake decided to choose violence.", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    new Thread(() -> {
+                        boolean won = new battleMockUp3().startBattleAndWait3();
+                        if (won) {
+                            world[worldIndex(23, 17)] = 0;
+                            render(snakess, portall);
+                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    }).start();
+                }
+            }
+        }
+        if ((playerX == 24 && playerY == 18)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                c = (int)(Math.random()*10+1);
+                JOptionPane.showMessageDialog(frame, "You found a snake under the rock!", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                if (c >= 1 && c <=4) {
+                    JOptionPane.showMessageDialog(frame, "The Snake was startled and ran away", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    world[worldIndex(24, 17)] = 0;
+                    render(snakess, portall);
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "The Snake decided to choose violence.", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    new Thread(() -> {
+                        boolean won = new battleMockUp3().startBattleAndWait3();
+                        if (won) {
+                            world[worldIndex(24, 17)] = 0;
+                            render(snakess, portall);
+                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    }).start();
+                }
+            }
+        }
+        if ((playerX == 23 && playerY == 17)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                c = (int)(Math.random()*10+1);
+                JOptionPane.showMessageDialog(frame, "You found a snake under the rock!", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                if (c >= 1 && c <=4) {
+                    JOptionPane.showMessageDialog(frame, "The Snake was startled and ran away", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    world[worldIndex(23, 16)] = 0;
+                    render(snakess, portall);
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "The Snake decided to choose violence.", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    new Thread(() -> {
+                        boolean won = new battleMockUp3().startBattleAndWait3();
+                        if (won) {
+                            world[worldIndex(23, 16)] = 0;
+                            render(snakess, portall);
+                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    }).start();
+                }
+            }
+        }
+        if ((playerX == 24 && playerY == 17)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                c = (int)(Math.random()*10+1);
+                JOptionPane.showMessageDialog(frame, "You found a snake under the rock!", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                if (c >= 1 && c <=4) {
+                    JOptionPane.showMessageDialog(frame, "The Snake was startled and ran away", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    world[worldIndex(24, 16)] = 0;
+                    render(snakess, portall);
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "The Snake decided to choose violence.", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    new Thread(() -> {
+                        boolean won = new battleMockUp3().startBattleAndWait3();
+                        if (won) {
+                            world[worldIndex(24, 16)] = 0;
+                            render(snakess, portall);
+                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    }).start();
+                }
+            }
+        }
+        if ((playerX == 23 && playerY == 16)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                c = (int)(Math.random()*10+1);
+                JOptionPane.showMessageDialog(frame, "You found a snake under the rock!", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                if (c >= 1 && c <=4) {
+                    JOptionPane.showMessageDialog(frame, "The Snake was startled and ran away", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    world[worldIndex(23, 15)] = 0;
+                    render(snakess, portall);
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "The Snake decided to choose violence.", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    new Thread(() -> {
+                        boolean won = new battleMockUp3().startBattleAndWait3();
+                        if (won) {
+                            world[worldIndex(23, 15)] = 0;
+                            render(snakess, portall);
+                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    }).start();
+                }
+            }
+        }
+        if ((playerX == 24 && playerY == 16)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                c = (int)(Math.random()*10+1);
+                JOptionPane.showMessageDialog(frame, "You found a snake under the rock!", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                if (c >= 1 && c <=4) {
+                    JOptionPane.showMessageDialog(frame, "The Snake was startled and ran away", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    world[worldIndex(24, 15)] = 0;
+                    render(snakess, portall);
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "The Snake decided to choose violence.", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    new Thread(() -> {
+                        boolean won = new battleMockUp3().startBattleAndWait3();
+                        if (won) {
+                            world[worldIndex(24, 15)] = 0;
+                            render(snakess, portall);
+                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    }).start();
+                }
+            }
+        }
+        if ((playerX == 24 && playerY == 15)) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                c = (int)(Math.random()*10+1);
+                JOptionPane.showMessageDialog(frame, "You found a snake under the rock!", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                if (c >= 1 && c <=4) {
+                    JOptionPane.showMessageDialog(frame, "The Snake was startled and ran away", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    world[worldIndex(24, 14)] = 0;
+                    render(snakess, portall);
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "The Snake decided to choose violence.", "Oh! A Snake!", JOptionPane.INFORMATION_MESSAGE);
+                    new Thread(() -> {
+                        boolean won = new battleMockUp3().startBattleAndWait3();
+                        if (won) {
+                            world[worldIndex(24, 14)] = 0;
+                            render(snakess, portall);
+                            JOptionPane.showMessageDialog(frame, "You won!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    }).start();
+                }
+            }
+        }
+        
+        //fence
+        if ((playerX >= 16 && playerX <= 19) && playerY == 7) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if (e1n == 0) {
+                    new Thread(() -> {
+                        boolean correct = new chunk1q().startdaquestion1(); //
+
+                        if (correct) {
+                            for (int x = 16; x <= 19; x++) {
+                                world[worldIndex(x, 8)] = 0;
+                            }
+                            render(snakess, portall);
+                            e1n++;
+                        }
+                    }).start();
+                }
+            }
+        }
+        if ((playerX >= 15 && playerX <= 19) && playerY == 16) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if (e2n == 0) { //
+                    new Thread(() -> {
+                        boolean correct = new chunk2q().startdaquestion2(); //
+
+                        if (correct) {
+                            for (int x = 15; x <= 19; x++) {
+                                world[worldIndex(x, 17)] = 0;
+                            }
+                            render(snakess, portall);
+                            e2n++; //
+                        }
+                    }).start();
+                }
+            }
+        }
+        if ((playerX >= 32 && playerX <= 35) && playerY == 31) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if (e3n == 0) { //
+                    new Thread(() -> {
+                        boolean correct = new chunk3q().startdaquestion3(); //
+
+                        if (correct) {
+                            for (int x = 32; x <= 35; x++) {
+                                world[worldIndex(x, 32)] = 0;
+                            }
+                            render(snakess, portall);
+                            e3n++; //
+                        }
+                    }).start();
+                }
+            }
+        }
+        if (playerX == 14 && (playerY >= 13 && playerY <= 16)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if (e4n == 0) { //
+                    new Thread(() -> {
+                        boolean correct = new chunk4q().startdaquestion4(); //
+
+                        if (correct) {
+                            for (int y = 13; y <= 16; y++) {
+                                world[worldIndex(13, y)] = 0;
+                            }
+                            render(snakess, portall);
+                            e4n++; //
+                        }
+                    }).start();
+                }
+            }
+        }
+        if (playerX == 15 && (playerY >= 28 && playerY <= 29)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if (e5n == 0) { //
+                    new Thread(() -> {
+                        boolean correct = new chunk5q().startdaquestion5(); //
+
+                        if (correct) {
+                            for (int y = 28; y <= 29; y++) {
+                                world[worldIndex(14, y)] = 0;
+                            }
+                            render(snakess, portall);
+                            e5n++; //
+                        }
+                    }).start();
+                }
+            }
+        }
+        
+        
+        //Snake Summon
+        if ((playerX == 1 && playerY == 35)) {
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                if (snakess == 0) {
+                    JOptionPane.showMessageDialog(frame, "You hear a slight rumbling noise..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                    snakess++;
+                    render(snakess, portall);
+                }
+            }
+        }
+        
+        //Snake Battle
+        if ((playerX == 1 && playerY == 35)) {
+            if(e.getKeyCode() == KeyEvent.VK_K){
+                if(snakess == 1) {
+                    new Thread(() -> {
+                        boolean won = new battleMockUp1().startBattleAndWait1();
+                        System.out.print(gamewon);
+                        if (won) {
+                            JOptionPane.showMessageDialog(frame, "You won! Speak to the old man to exit!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            wincon++;
+                            chatText.setText("Well done traveller.");
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "You died..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "You have to restart..", "Information", JOptionPane.INFORMATION_MESSAGE);
+                            finished = true;
+                            gamewon = false; // or false
+                            frame.dispose();
+                            frame.dispose();
+                            frame.dispose(); // close current game
+
+                            SwingUtilities.invokeLater(() -> {
+                                new GroupPD().MainCodeBlock(); // start fresh game
+                            });
+                        }
+                    }).start();
+                }
+            }
+        }
+        
+    }
+
+    
+    @Override
+    public void keyReleased(KeyEvent e) {
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource()==exitB){
+            setChatVisible(false);
+            frame.setFocusable(true);
+            frame.setVisible(false);
+            frame.setVisible(true);
+        } else if (e.getSource()==nextB) {
+            if (wincon == 0) {
+                if (cht == 0) {
+                    chatText.setText("This place is directly under the oval.");
+                    cht++;
+                } else if (cht == 1) {
+                    chatText.setText("And the place where the Ruler of the Snakes reside.");
+                    cht++;
+                } else if (cht == 2) {
+                    chatText.setText("You must progress through this maze like place first to reach the snake.");
+                    cht++;
+                } else if (cht == 3) {
+                    chatText.setText("Watch out for the rocks though, they have snakes living under them.");
+                    cht++;
+                } else if (cht == 4) {
+                    chatText.setText("If you get lucky, they might scurry away.");
+                    cht++;
+                } else if (cht == 5) {
+                    chatText.setText("But if they don't, get ready for a rough battle.");
+                    cht++;
+                } else if (cht == 6) {
+                    chatText.setText("Barriers around this cave can be broken by your weapon.");
+                    cht++;
+                } else if (cht == 7) {
+                    chatText.setText("Good luck traveller.");
+                    cht++;
+                    nextB.setVisible(false);
+                }
+            } else if (wincon == 1) {
+                if (bct == 0) {
+                    chatText.setText("You have successfully defeated the Ruler of the Snakes");
+                    bct++;
+                } else if (bct == 1) {
+                    chatText.setText("I see that you have collected its eye as well.");
+                    bct++;
+                } else if (bct == 2) {
+                    chatText.setText("I'll help you out of this cave, come with me.");
+                    bct++;
+                } else if (bct == 3) {
+                    finished = true;
+                    gamewon = true; // or false
+                    frame.dispose();
+                    frame.dispose();
+                }
+            }
+        }
+    }
+    public class portaltech extends GroupPD6 {
+        ImageIcon portal1;
+        ImageIcon portal2;
+        public portaltech() {
+            portal1=new ImageIcon("Images/portal1.png");
+            portal2=new ImageIcon("Images/portal2.png");
+            portal1 = new ImageIcon(portal1.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+            portal2 = new ImageIcon(portal2.getImage().getScaledInstance((frameWidth / mapWidth),(frameHeight / mapHeight),Image.SCALE_DEFAULT));
+        }
+    }
+}
