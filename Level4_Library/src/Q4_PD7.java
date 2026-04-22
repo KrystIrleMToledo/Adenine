@@ -3,11 +3,10 @@ import javax.sound.sampled.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.File;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.io.*;
 
 public class Q4_PD7 implements KeyListener {
     JFrame frame;
@@ -39,7 +38,9 @@ public class Q4_PD7 implements KeyListener {
     String playerType = "boy";
 
     private Clip backgroundMusic;
-    
+    long startTime;
+    String fastestTimeFile = "fastest_time.txt";
+
     private void loadPlayerType() {
         try {
             BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
@@ -49,15 +50,15 @@ public class Q4_PD7 implements KeyListener {
             }
             br.close();
         } catch (IOException e) {
-            System.out.println("substitute.txt not found, defaulting to boy");
             playerType = "boy";
         }
     }
 
     public Q4_PD7() {
-        loadPlayerType(); 
+        loadPlayerType();
         loadLevel(1);
         setFrame();
+        startTime = System.currentTimeMillis();
     }
 
     private void playMusic(String fileName) {
@@ -207,74 +208,95 @@ public class Q4_PD7 implements KeyListener {
         return false;
     }
 
+    private void checkAndSaveFastestTime() {
+        long endTime = System.currentTimeMillis();
+        long currentRunTime = (endTime - startTime) / 1000;
+        long bestTime = Long.MAX_VALUE;
+        File file = new File(fastestTimeFile);
+        try {
+            if (file.exists()) {
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                String line = br.readLine();
+                if (line != null) bestTime = Long.parseLong(line.trim());
+                br.close();
+            }
+            if (currentRunTime < bestTime) {
+                PrintWriter pw = new PrintWriter(new FileWriter(file));
+                pw.println(currentRunTime);
+                pw.close();
+                JOptionPane.showMessageDialog(frame, "🏆 NEW RECORD! \nFastest Time: " + currentRunTime + " seconds");
+            } else {
+                JOptionPane.showMessageDialog(frame, "Game Over! \nYour Time: " + currentRunTime + "s\nRecord: " + bestTime + "s");
+            }
+        } catch (IOException | NumberFormatException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void triggerQuiz() {
-    if (isQuizRunning) return;
-    isQuizRunning = true;
-
-    String[][] data;
-    
-    if (currentLevel == 1) {
-        if (currentQuizLevel == 1) {
-            data = new String[][]{
-                {"Which binary number represents the decimal value of 5?", "101", "111", "010", "110"},
-                {"According to Newton's Second Law, Force equals Mass times what?", "Acceleration", "Velocity", "Inertia", "Gravity"}
-            };
-        } else {
-            data = new String[][]{
-                {"Which subatomic particle has a negative charge?", "Electron", "Proton", "Neutron", "Photon"},
-                {"In a right-angled triangle, a² + b² equals?", "c²", "c²", "2c", "a+b"}
-            };
-        }
-    } else { // MAP 2 QUESTIONS
-        if (currentQuizLevel == 1) {
-            data = new String[][]{
-                {"What is the most abundant gas in Earth's atmosphere?", "Nitrogen", "Oxygen", "Argon", "Carbon Dioxide"},
-                {"Which organ in the human body is responsible for filtering blood?", "Kidney", "Heart", "Lungs", "Stomach"}
-            };
-        } else {
-            data = new String[][]{
-                {"What does 'HTTP' stand for in a website address?", "Hypertext Transfer Protocol", "High Tech Trust Process", "Hyperlink Text Terminal", "Home Tool Transfer Program"},
-                {"Who is known as the father of modern Computer Science?", "Alan Turing", "Isaac Newton", "Albert Einstein", "Steve Jobs"}
-            };
-        }
-    }
-
-    for (String[] q : data) {
-        String[] opts = new String[q.length - 1];
-        System.arraycopy(q, 1, opts, 0, q.length - 1);
-        List<String> list = Arrays.asList(opts);
-        Collections.shuffle(list);
-        opts = list.toArray(new String[0]);
-
-        int res = JOptionPane.showOptionDialog(frame, q[0], "Map " + currentLevel + " - Challenge " + currentQuizLevel, 
-                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opts, opts[0]);
-        
-        if (res == JOptionPane.CLOSED_OPTION || !opts[res].equals(q[1])) {
-            JOptionPane.showMessageDialog(frame, "❌ Incorrect!\nTry again.");
-            isQuizRunning = false;
-            frame.requestFocusInWindow();
-            return;
-        }
-    }
-
-    // Progression Logic
-    if (currentQuizLevel == 1) {
-        JOptionPane.showMessageDialog(frame, "✅ You completed this question set! Now, move to the next spot.");
-        updateTileImage(quiz1TileIndex, "92_after.png");
-        updateTileImage(quiz2TileIndex, "21_during.png");
-        currentQuizLevel = 2;
-    } else {
+        if (isQuizRunning) return;
+        isQuizRunning = true;
+        String[][] data;
         if (currentLevel == 1) {
-            JOptionPane.showMessageDialog(frame, "✅ CONGRATULATIONS! \n You have cleared - wait, what's going on?");
-            loadLevel(2);
+            if (currentQuizLevel == 1) {
+                data = new String[][]{
+                    {"Which binary number represents the decimal value of 5?", "101", "111", "010", "110"},
+                    {"According to Newton's Second Law, Force equals Mass times what?", "Acceleration", "Velocity", "Inertia", "Gravity"}
+                };
+            } else {
+                data = new String[][]{
+                    {"Which subatomic particle has a negative charge?", "Electron", "Proton", "Neutron", "Photon"},
+                    {"In a right-angled triangle, a² + b² equals?", "c²", "c²", "2c", "a+b"}
+                };
+            }
         } else {
-            JOptionPane.showMessageDialog(frame, "✅ FINAL MISSION COMPLETE!\n Now, follow the nurse's direction without hesitation.");
-            updateTileImage(quiz2TileIndex, "21_after.png");
+            if (currentQuizLevel == 1) {
+                data = new String[][]{
+                    {"What is the most abundant gas in Earth's atmosphere?", "Nitrogen", "Oxygen", "Argon", "Carbon Dioxide"},
+                    {"Which organ in the human body is responsible for filtering blood?", "Kidney", "Heart", "Lungs", "Stomach"}
+                };
+            } else {
+                data = new String[][]{
+                    {"What does 'HTTP' stand for in a website address?", "Hypertext Transfer Protocol", "High Tech Trust Process", "Hyperlink Text Terminal", "Home Tool Transfer Program"},
+                    {"Who is known as the father of modern Computer Science?", "Alan Turing", "Isaac Newton", "Albert Einstein", "Steve Jobs"}
+                };
+            }
         }
+
+        for (String[] q : data) {
+            String[] opts = new String[q.length - 1];
+            System.arraycopy(q, 1, opts, 0, q.length - 1);
+            List<String> list = Arrays.asList(opts);
+            Collections.shuffle(list);
+            opts = list.toArray(new String[0]);
+            int res = JOptionPane.showOptionDialog(frame, q[0], "Map " + currentLevel + " - Challenge " + currentQuizLevel, 
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opts, opts[0]);
+            if (res == JOptionPane.CLOSED_OPTION || !opts[res].equals(q[1])) {
+                JOptionPane.showMessageDialog(frame, "❌ Incorrect!\nTry again.");
+                isQuizRunning = false;
+                frame.requestFocusInWindow();
+                return;
+            }
+        }
+
+        if (currentQuizLevel == 1) {
+            JOptionPane.showMessageDialog(frame, "✅ You completed this question set! Now, move to the next spot.");
+            updateTileImage(quiz1TileIndex, "92_after.png");
+            updateTileImage(quiz2TileIndex, "21_during.png");
+            currentQuizLevel = 2;
+        } else {
+            if (currentLevel == 1) {
+                JOptionPane.showMessageDialog(frame, "✅ CONGRATULATIONS! \n You have cleared Map 1.");
+                loadLevel(2);
+            } else {
+                JOptionPane.showMessageDialog(frame, "✅ FINAL MISSION COMPLETE!");
+                updateTileImage(quiz2TileIndex, "21_after.png");
+                checkAndSaveFastestTime();
+            }
+        }
+        isQuizRunning = false;
+        frame.requestFocusInWindow();
     }
-    isQuizRunning = false;
-    frame.requestFocusInWindow();
-}
 
     public void keyPressed(KeyEvent e) {
         if (isMoving || isQuizRunning) return;
@@ -286,7 +308,6 @@ public class Q4_PD7 implements KeyListener {
             case KeyEvent.VK_RIGHT: next += 1; lastDirection = 2; break;
             default: return;
         }
-
         if (next < 0 || next >= tiles.length || isBlocked(next)) return;
         if (e.getKeyCode() == KeyEvent.VK_RIGHT && characterPosition % mapWidth == mapWidth - 1) return;
         if (e.getKeyCode() == KeyEvent.VK_LEFT && characterPosition % mapWidth == 0) return;
@@ -294,7 +315,6 @@ public class Q4_PD7 implements KeyListener {
         isMoving = true;
         character[characterPosition].setIcon(null);
         characterPosition = next;
-        
         ImageIcon[] anim = (lastDirection == 0) ? walkDown : (lastDirection == 1) ? walkLeft : (lastDirection == 2) ? walkRight : walkUp;
         character[characterPosition].setIcon(anim[animationToggle]);
 
