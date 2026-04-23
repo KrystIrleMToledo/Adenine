@@ -1,0 +1,593 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package PD8TOTAL;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class sumGUI implements KeyListener, MouseListener, ActionListener {
+    class InvalidKeyException extends Exception {
+        public InvalidKeyException(String message) {
+            super(message);
+        }
+    }
+    JFrame frame;
+    ImageIcon floorTile, chair, table, playerIcon, playerIcon2, NPCIcon;
+    ImageIcon playerIconfront, playerIconfront2, playerIconback, playerIconback2;
+    ImageIcon playerIconleft, playerIconright, playerIconleft2, playerIconright2;
+    ImageIcon doorLocked, doorOpen; // NEW: Door images
+   
+    JLabel tiles[];
+    JLabel character[];
+    JLabel chatSpace;
+    JLabel textSpace;
+    JButton choices[];
+    JButton nextB;
+    JButton exitB;
+   
+    int mapLayout[];
+    int characterPlace[];
+    int mapWidth = 12;
+    int mapHeight = 12;
+    int frameWidth = 600;
+    int frameHeight = 600;
+    int characterPosition;
+    int characterMode;
+    int NPCLocation;
+    int doorLocation; // NEW: Track door position
+    int direction;
+    int tileSize;
+   
+    // Quiz variables
+    String NPCScript[];
+    String Questions[];
+    String Answers[];
+    int scriptIndex;
+    int questionsIndex;
+    int answerKey;
+    int quizMode;
+    int correctCount;
+    boolean quizActive = false;
+    boolean doorUnlocked = false; // NEW: Door state
+    boolean gameWon = false; // NEW: Game state
+    String playerType = "boy";
+   
+    Timer animTimer;
+    boolean moving = false;
+    int animFrame = 0;
+   
+    private void loadPlayerType() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("substitute.txt"));
+            String line = br.readLine();
+            if (line != null) {
+                playerType = line.trim().toLowerCase();
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("substitute.txt not found, defaulting to boy");
+            playerType = "boy";
+        }
+    }
+   
+    public sumGUI() {
+        loadPlayerType();
+        characterPosition = -1;
+        characterMode = 0;
+        NPCLocation = -1;
+        doorLocation = -1; // NEW
+        direction = -1;
+        scriptIndex = 0;
+        questionsIndex = 0;
+        answerKey = -1;
+        quizMode = 0;
+        correctCount = 0;
+       
+        NPCScript = new String[]{
+            "Hello, student. Welcome to PD5.",
+            "You are currently trapped in this classroom.",
+            "For you to escape, you must answer all questions correctly.",
+            "No mistakes allowed.",
+            "Ready? Here's the first one..."
+        };
+       
+        Questions = new String[]{
+            "What is the color of apple?",
+            "Who is your CS4 teacher?",
+            "What is 2 + 2?",
+            "What programming language is this?"
+        };
+       
+        Answers = new String[]{
+            "Red_White_Blue_Pink_0",
+            "Sir B_Maam Michelle_Maam Mau_Sir Trex_3",
+            "3_4_5_6_1",
+            "Java_Python_C++_JavaScript_0"
+        };
+       
+        frame = new JFrame("PD5 Classroom Escape");
+        tileSize = frameWidth / mapWidth;
+       
+        // Load images
+        floorTile = new ImageIcon(new ImageIcon("Images/Images1/tile.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
+        chair = new ImageIcon(new ImageIcon("Images/Images1/chair.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
+        table = new ImageIcon(new ImageIcon("Images/Images1/table.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
+       
+        // NEW: Door images (use existing images or create these)
+        doorLocked = new ImageIcon(new ImageIcon("Images/Images1/door_locked.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
+        doorOpen = new ImageIcon(new ImageIcon("Images/Images1/door_open.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
+       // Player animations based on type
+        if (playerType.equals("girl")) {
+
+            playerIconfront = playerIcon = new ImageIcon(
+                new ImageIcon("Images/Images1/girlwalk1.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconfront2 = new ImageIcon(
+                new ImageIcon("Images/Images1/girlwalk2.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback = new ImageIcon(
+                new ImageIcon("Images/Images1/girlwalk5.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback2 = new ImageIcon(
+                new ImageIcon("Images/Images1/girlwalk6.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright = new ImageIcon(
+                new ImageIcon("Images/Images1/girlwalk3.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft = new ImageIcon(
+                new ImageIcon("Images/Images1/girlwalk4.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright2 = new ImageIcon(
+                new ImageIcon("Images/Images1/girlwalk7.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft2 = new ImageIcon(
+                new ImageIcon("Images/Images1/girlwalk8.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+        } else {
+
+            playerIconfront = playerIcon = new ImageIcon(
+                new ImageIcon("Images/Images1/boywalk1.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconfront2 = new ImageIcon(
+                new ImageIcon("Images/Images1/boywalk2.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback = new ImageIcon(
+                new ImageIcon("Images/Images1/boywalk5.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconback2 = new ImageIcon(
+                new ImageIcon("Images/Images1/boywalk6.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright = new ImageIcon(
+                new ImageIcon("Images/Images1/boywalk3.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft = new ImageIcon(
+                new ImageIcon("Images/Images1/boywalk4.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconright2 = new ImageIcon(
+                new ImageIcon("Images/Images1/boywalk7.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+
+            playerIconleft2 = new ImageIcon(
+                new ImageIcon("Images/Images1/boywalk8.png").getImage()
+                .getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH)
+            );
+        }
+
+        playerIcon2 = playerIconfront2;
+       
+        NPCIcon = new ImageIcon(new ImageIcon("Images/Images1/boy1.png").getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH));
+       
+        // Chat UI setup
+        chatSpace = new JLabel();
+        textSpace = new JLabel(NPCScript[0]);
+        scriptIndex++;
+        choices = new JButton[4];
+        for (int i = 0; i < 4; i++) {
+            choices[i] = new JButton((i + 1) + "");
+            choices[i].addActionListener(this);
+        }
+        nextB = new JButton("Next");
+        exitB = new JButton("Cancel");
+        nextB.addActionListener(this);
+        exitB.addActionListener(this);
+        try {
+           // Character placement (0=empty, 1=blocked, 2=player, 3=NPC)
+            character = new JLabel[mapWidth * mapHeight];
+            characterPlace = new int[]{
+                1,1,1,1,1,1,1,1,1,1,1,1,
+                1,0,0,0,0,0,0,0,0,3,0,1,
+                1,0,0,1,0,0,0,0,0,1,0,1,
+                1,0,0,0,0,0,0,0,0,0,0,1,
+                1,0,0,1,0,0,0,0,0,1,0,1,
+                1,0,0,0,0,2,0,0,0,0,0,1,
+                1,0,0,1,0,0,0,0,0,1,0,1,
+                1,0,0,0,0,0,0,0,0,0,0,1,
+                1,0,0,1,0,0,0,0,0,1,0,1,
+                1,0,0,0,0,0,0,0,0,0,0,1,
+                1,0,0,1,0,0,0,0,0,1,0,1,
+                1,1,1,1,1,1,4,1,1,1,1,1  // 4 = DOOR at bottom center (position 131)
+            };
+             // Bottom center: row 11, col 6 (11*12 + 6 = 138... wait let me calculate)
+            // Actually: row 11 (index 11), col 6 (index 6) = 11*12 + 6 = 138? No wait
+            // Row 0-11, Col 0-11
+            // Row 11: indices 132-143
+            // Col 6: 132 + 6 = 138
+            doorLocation = 138;
+            if(characterPlace.length != mapWidth * mapHeight){
+                throw new ArrayIndexOutOfBoundsException("Size is incorrect");
+            }
+
+            for (int i = 0; i < character.length; i++) {
+                if (characterPlace[i] == 2) {
+                    character[i] = new JLabel(playerIcon);
+                    characterPosition = i;
+                } else if (characterPlace[i] == 3) {
+                    character[i] = new JLabel(NPCIcon);
+                    NPCLocation = i;
+                } else {
+                    character[i] = new JLabel();
+                }
+            }
+        }
+        catch (ArrayIndexOutOfBoundsException ex) {
+            JOptionPane.showMessageDialog(frame,"World does not fit size","Error",JOptionPane.ERROR_MESSAGE);
+        }
+       
+        try{
+            // PD5 Map: 0=floor, 1=table, 2=chair, 4=locked door
+            tiles = new JLabel[mapWidth * mapHeight];
+            mapLayout = new int[]{
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,2,1,2,0,0,2,1,2,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,2,1,2,0,0,2,1,2,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,2,1,2,0,0,2,1,2,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,2,1,2,0,0,2,1,2,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,2,1,2,0,0,2,1,2,0,0,
+                0,0,0,0,0,0,4,0,0,0,0,0 // 4 = door at bottom center
+            };
+            if(mapLayout.length != mapWidth * mapHeight){
+                throw new ArrayIndexOutOfBoundsException("Size is incorrect");
+            }
+            for (int i = 0; i < tiles.length; i++) {
+                if (mapLayout[i] == 0) {
+                    tiles[i] = new JLabel(floorTile);
+                } else if (mapLayout[i] == 1) {
+                    tiles[i] = new JLabel(table);
+                } else if (mapLayout[i] == 2) {
+                    tiles[i] = new JLabel(chair);
+                } else if (mapLayout[i] == 4) { // NEW: Locked door
+                    tiles[i] = new JLabel(doorLocked);
+                }
+            }
+        }
+        catch (ArrayIndexOutOfBoundsException ex) {
+            JOptionPane.showMessageDialog(frame,"World does not fit size","Error",JOptionPane.ERROR_MESSAGE);
+        }
+
+    }
+   
+    public void setAllChatComponentsVisible(boolean b) {
+        textSpace.setVisible(b);
+        for (int i = 0; i < 4; i++) choices[i].setVisible(b);
+        exitB.setVisible(b);
+        nextB.setVisible(b);
+        chatSpace.setVisible(b);
+        quizActive = b;
+    }
+   
+    public void setConvoComponentsVisible(boolean b) {
+        textSpace.setVisible(b);
+        exitB.setVisible(b);
+        nextB.setVisible(b);
+        chatSpace.setVisible(b);
+        quizActive = b;
+    }
+   
+    public void setChoicesVisible(boolean b) {
+        for (int i = 0; i < 4; i++) choices[i].setVisible(b);
+    }
+   
+    public void setFrame() {
+        frame.setLayout(null);
+       
+        // Chat UI setup
+        chatSpace.setOpaque(true);
+        chatSpace.setBackground(new Color(243, 246, 232));
+        chatSpace.setBounds(0, frameHeight - 150, frameWidth, 150);
+        textSpace.setBounds(20, frameHeight - 140, frameWidth - 40, 30);
+       
+        int btnWidth = (frameWidth - 60) / 4;
+        for (int i = 0; i < 4; i++) {
+            choices[i].setBounds(15 + (i * (btnWidth + 5)), frameHeight - 100, btnWidth, 30);
+        }
+        exitB.setBounds(frameWidth - 150, frameHeight - 60, 100, 30);
+        nextB.setBounds(frameWidth - 260, frameHeight - 60, 100, 30);
+       
+        frame.add(textSpace);
+        for (int i = 0; i < 4; i++) frame.add(choices[i]);
+        frame.add(exitB);
+        frame.add(nextB);
+        frame.add(chatSpace);
+        setAllChatComponentsVisible(false);
+       
+        // Add tiles
+        for (int i = 0; i < tiles.length; i++) {
+            int x = (i % mapWidth) * tileSize;
+            int y = (i / mapWidth) * tileSize;
+            tiles[i].setBounds(x, y, tileSize, tileSize);
+            frame.add(tiles[i]);
+        }
+       
+        // Add characters on top
+        for (int i = 0; i < character.length; i++) {
+            int x = (i % mapWidth) * tileSize;
+            int y = (i / mapWidth) * tileSize;
+            character[i].setBounds(x, y, tileSize, tileSize);
+            frame.add(character[i]);
+        }
+       
+        animTimer = new Timer(150, e -> {
+            if (moving) {
+                animFrame ^= 1;
+            } else {
+                animFrame = 0; // idle frame reset
+            }
+            frame.repaint();
+        });
+
+        animTimer.start();
+       
+        frame.setSize(frameWidth, frameHeight + 37);
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(false);
+       
+        frame.addKeyListener(this);
+        frame.setFocusable(true);
+        frame.requestFocus();
+    }
+   
+    public boolean isWalkable(int pos) {
+        if (pos < 0 || pos >= mapWidth * mapHeight) return false;
+        // Check if it's the door
+        if (pos == doorLocation) {
+            return doorUnlocked; // Only walkable if unlocked
+        }
+        // Check map layout (tables/chairs block) and character placement (NPC blocks)
+        return mapLayout[pos] != 1 && characterPlace[pos] != 1 && characterPlace[pos] != 3;
+    }
+   
+    // NEW: Method to unlock the door
+    public void unlockDoor() {
+        doorUnlocked = true;
+        tiles[doorLocation].setIcon(doorOpen);
+        mapLayout[doorLocation] = 0; // Become walkable floor
+        JOptionPane.showMessageDialog(frame, "🚪 The door unlocks! You can now escape!");
+    }
+   
+    // NEW: Method to check win condition
+    public void checkWin() {
+        if (characterPosition == doorLocation && doorUnlocked && !gameWon) {
+            gameWon = true;
+            JOptionPane.showMessageDialog(frame, "🎉 Congratulations! You escaped PD5!");
+            new sumGUI2().gr8b();
+        }
+    }
+   
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (quizActive) return;
+        if (gameWon) return; // NEW: Stop movement after winning
+        int newPosition = characterPosition;
+        try {
+           
+            if (e.getKeyCode() == KeyEvent.VK_W || e.getKeyCode() == KeyEvent.VK_A || e.getKeyCode() == KeyEvent.VK_S || e.getKeyCode() == KeyEvent.VK_D) {
+
+                throw new InvalidKeyException("Use arrow keys only.");
+            }
+           
+            if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                direction = 3;
+                if (characterPosition % mapWidth != mapWidth - 1) {
+                    newPosition = characterPosition + 1;
+                    playerIcon = (animFrame == 0) ? playerIconright : playerIconright2;
+                }
+            }
+
+            else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                direction = 2;
+                if (characterPosition % mapWidth != 0) {
+                    newPosition = characterPosition - 1;
+                    playerIcon = (animFrame == 0) ? playerIconleft : playerIconleft2;
+                }
+            }
+
+            else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                direction = 1;
+                if (characterPosition + mapWidth < mapWidth * mapHeight) {
+                    newPosition = characterPosition + mapWidth;
+                    playerIcon = (animFrame == 0) ? playerIconfront : playerIconfront2;
+                }
+            }
+
+            else if (e.getKeyCode() == KeyEvent.VK_UP) {
+                direction = 0;
+                if (characterPosition - mapWidth >= 0) {
+                    newPosition = characterPosition - mapWidth;
+                    playerIcon = (animFrame == 0) ? playerIconback : playerIconback2;
+                }
+            }
+        }
+        catch (InvalidKeyException ex){
+            JOptionPane.showMessageDialog(frame, ex.getMessage());
+        }
+       
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            // Check if facing NPC
+            int target = -1;
+            if (direction == 0) target = characterPosition - mapWidth;
+            else if (direction == 1) target = characterPosition + mapWidth;
+            else if (direction == 2) target = characterPosition - 1;
+            else if (direction == 3) target = characterPosition + 1;
+           
+            if (target == NPCLocation) {
+                setConvoComponentsVisible(true);
+                frame.setFocusable(false);
+            }
+            return;
+        }
+       
+        boolean attemptedMove = false;
+
+        if (e.getKeyCode() == KeyEvent.VK_UP ||
+            e.getKeyCode() == KeyEvent.VK_DOWN ||
+            e.getKeyCode() == KeyEvent.VK_LEFT ||
+            e.getKeyCode() == KeyEvent.VK_RIGHT) {
+            attemptedMove = true;
+        }
+
+        boolean moved = false;
+
+        if (isWalkable(newPosition) && newPosition != characterPosition) {
+            character[characterPosition].setIcon(null);
+            characterPlace[characterPosition] = 0;
+
+            characterPosition = newPosition;
+            character[characterPosition].setIcon(playerIcon);
+            characterPlace[characterPosition] = 2;
+
+            checkWin();
+            moved = true;
+        }
+
+        moving = moved;
+    }
+   
+    @Override public void keyTyped(KeyEvent e) {}
+    @Override public void keyReleased(KeyEvent e) {}
+   
+    @Override public void mouseClicked(MouseEvent e) {}
+    @Override public void mousePressed(MouseEvent e) {}
+    @Override public void mouseReleased(MouseEvent e) {}
+    @Override public void mouseEntered(MouseEvent e) {}
+    @Override public void mouseExited(MouseEvent e) {}
+   
+    public void loadNextQuestion() {
+        textSpace.setText(Questions[questionsIndex]);
+        String answersArray[] = Answers[questionsIndex].split("_");
+        for (int i = 0; i < 4; i++) {
+            choices[i].setText(answersArray[i]);
+        }
+        answerKey = Integer.parseInt(answersArray[4]);
+    }
+   
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == exitB) {
+            setAllChatComponentsVisible(false);
+            frame.setFocusable(true);
+            frame.requestFocus();
+            scriptIndex = 0;
+            textSpace.setText(NPCScript[0]);
+            scriptIndex++;
+            quizMode = 0;
+            questionsIndex = 0;
+            correctCount = 0;
+        } else if (e.getSource() == nextB) {
+            if (quizMode == 0) {
+                if (scriptIndex < NPCScript.length) {
+                    textSpace.setText(NPCScript[scriptIndex]);
+                    scriptIndex++;
+                } else {
+                    correctCount = 0;
+                    setChoicesVisible(true);
+                    questionsIndex = 0;
+                    loadNextQuestion();
+                    quizMode = 1;
+                }
+            } else {
+                questionsIndex++;
+                if (questionsIndex < Questions.length) {
+                    loadNextQuestion();
+                    setChoicesVisible(true);
+                } else {
+                    if (correctCount == Questions.length) {
+                        textSpace.setText("🎉 Congrats! You answered all correctly. The door is now open!");
+                        unlockDoor(); // NEW: Open the door!
+                    } else {
+                        textSpace.setText("❌ You got some wrong. Try again from the start.");
+                        questionsIndex = 0;
+                        correctCount = 0;
+                        quizMode = 0;
+                        scriptIndex = 0;
+                    }
+                }
+            }
+        } else if (e.getSource() == choices[0]) {
+            checkAnswer(0);
+        } else if (e.getSource() == choices[1]) {
+            checkAnswer(1);
+        } else if (e.getSource() == choices[2]) {
+            checkAnswer(2);
+        } else if (e.getSource() == choices[3]) {
+            checkAnswer(3);
+        }
+    }
+   
+    private void checkAnswer(int choice) {
+        setChoicesVisible(false);
+        if (answerKey == choice) {
+            textSpace.setText("✅ Correct!");
+            correctCount++;
+        } else {
+            textSpace.setText("❌ Wrong!");
+        }
+    }
+    public boolean gr8a() {
+        SwingUtilities.invokeLater(this::setFrame);
+        return true;
+    }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new sumGUI().setFrame());
+    }
+}
