@@ -231,7 +231,7 @@ public class sumGUI2 implements KeyListener, MouseListener {
                 tiles[i] = new JLabel(cashierCounterHalf1);
             else if (mapLayout[i] == 7) 
                 tiles[i] = new JLabel(cashierCounterHalf2);
-            else if (mapLayout[i] == 😎
+            else if (mapLayout[i] == 8)
                 tiles[i] = new JLabel(cashierCounterHalf3);
             else if (mapLayout[i] == 9) 
                 tiles[i] = new JLabel(cashierCounterHalf4);
