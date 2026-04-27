@@ -93,19 +93,21 @@ public class sumGUI implements KeyListener, MouseListener, ActionListener {
             "Ready? Here's the first one..."
         };
        
-        Questions = new String[]{
-            "What is the color of apple?",
-            "Who is your CS4 teacher?",
-            "What is 2 + 2?",
-            "What programming language is this?"
-        };
+     Questions = new String[]{
+    "What is the color of apple?",
+    "What does CPU stand for?",
+    "What is 2 + 2?",
+    "What programming language is this?"
+};
+
+
        
-        Answers = new String[]{
-            "Red_White_Blue_Pink_0",
-            "Sir B_Maam Michelle_Maam Mau_Sir Trex_3",
-            "3_4_5_6_1",
-            "Java_Python_C++_JavaScript_0"
-        };
+     Answers = new String[]{
+    "Red_White_Blue_Pink_0",
+    "Central Process Unit_Central Processing Unit_Computer Power Unit_Control Program Unit_1",
+    "3_4_5_6_1",
+    "Java_Python_C++_JavaScript_0"
+};
        
         frame = new JFrame("PD5 Classroom Escape");
         tileSize = frameWidth / mapWidth;
